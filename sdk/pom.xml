@@ -8,7 +8,7 @@
     <parent>
         <groupId>io.opencode</groupId>
         <artifactId>opencode-java-dsk</artifactId>
-        <version>0.1.0-SNAPSHOT</version>
+        <version>${revision}</version>
     </parent>
 
     <artifactId>opencode-sdk</artifactId>
@@ -132,11 +132,12 @@
             </plugin>
 
             <!-- Post-process generated sources to fix OpenAPI Generator bugs:
-                 Bug: anyOf schemas with Map<K,V> types produce invalid Java syntax:
-                   - Map<String, Foo>.class  (parameterized type literal is not valid Java)
-                   - getMap<String, Foo>()    (generics in method identifier is not valid Java)
-                 Fix: replace with raw Map.class and getMap() — semantically equivalent
-                 due to type erasure at runtime.
+                 Bug: anyOf/oneOf schemas with parameterized types produce invalid Java syntax:
+                   - Map<String, Foo>.class   (parameterized type literal is not valid Java)
+                   - List<Object>.class        (parameterized type literal is not valid Java)
+                   - getMap<String, Foo>()     (generics in method identifier is not valid Java)
+                   - getList<Object>()         (generics in method identifier is not valid Java)
+                 Fix: replace with raw types — semantically equivalent due to type erasure at runtime.
             -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -144,21 +145,21 @@
                 <version>3.1.0</version>
                 <executions>
                     <execution>
-                        <id>fix-openapi-generator-map-bugs</id>
+                        <id>fix-openapi-generator-generics-bugs</id>
                         <phase>generate-sources</phase>
                         <goals>
                             <goal>run</goal>
                         </goals>
                         <configuration>
                             <target>
-                                <echo message="Fixing OpenAPI Generator bug: Map&lt;K,V&gt;.class is invalid Java syntax"/>
+                                <echo message="Fixing OpenAPI Generator bug: parameterized type literals are invalid Java syntax"/>
 
-                                <replaceregexp match="Map&lt;[^&gt;]*&gt;\.class" replace="Map.class" flags="g">
+                                <replaceregexp match="(Map|List|Set)&lt;[^&gt;]*&gt;\.class" replace="\1.class" flags="g">
                                     <fileset dir="${project.build.directory}/generated-sources/openapi/src/main/java/opencode/sdk/model"
                                              includes="*.java"/>
                                 </replaceregexp>
 
-                                <replaceregexp match="getMap&lt;[^&gt;]*&gt;\(\)" replace="getMap()" flags="g">
+                                <replaceregexp match="get(Map|List|Set)&lt;[^&gt;]*&gt;\(\)" replace="get\1()" flags="g">
                                     <fileset dir="${project.build.directory}/generated-sources/openapi/src/main/java/opencode/sdk/model"
                                              includes="*.java"/>
                                 </replaceregexp>
