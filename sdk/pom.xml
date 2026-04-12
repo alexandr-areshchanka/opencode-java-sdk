@@ -53,7 +53,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <version>${jackson.version}</version>
+            <version>${jackson.annotation.version}</version>
         </dependency>
 
         <!-- Jackson JSR310 support for generated code -->
@@ -99,18 +99,17 @@
                  To regenerate: uncomment this plugin, run mvn generate-sources, apply manual fixes,
                  and copy files back to src/main/java.
             -->
-            <!--
             <plugin>
                 <groupId>org.openapitools</groupId>
                 <artifactId>openapi-generator-maven-plugin</artifactId>
-                <version>7.20.0</version>
+                <version>7.21.0</version>
                 <executions>
                     <execution>
                         <goals>
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>openapi.json</inputSpec>
+                            <inputSpec>${project.basedir}/openapi.json</inputSpec>
                             <generatorName>java</generatorName>
                             <library>native</library>
                             <apiPackage>opencode.sdk.api</apiPackage>
@@ -131,18 +130,42 @@
                     </execution>
                 </executions>
             </plugin>
-            -->
 
+            <!-- Post-process generated sources to fix OpenAPI Generator bugs:
+                 Bug: anyOf schemas with Map<K,V> types produce invalid Java syntax:
+                   - Map<String, Foo>.class  (parameterized type literal is not valid Java)
+                   - getMap<String, Foo>()    (generics in method identifier is not valid Java)
+                 Fix: replace with raw Map.class and getMap() — semantically equivalent
+                 due to type erasure at runtime.
+            -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <version>3.1.0</version>
                 <executions>
                     <execution>
+                        <id>fix-openapi-generator-map-bugs</id>
                         <phase>generate-sources</phase>
                         <goals>
                             <goal>run</goal>
                         </goals>
+                        <configuration>
+                            <target>
+                                <echo message="Fixing OpenAPI Generator bug: Map&lt;K,V&gt;.class is invalid Java syntax"/>
+
+                                <replaceregexp match="Map&lt;[^&gt;]*&gt;\.class" replace="Map.class" flags="g">
+                                    <fileset dir="${project.build.directory}/generated-sources/openapi/src/main/java/opencode/sdk/model"
+                                             includes="*.java"/>
+                                </replaceregexp>
+
+                                <replaceregexp match="getMap&lt;[^&gt;]*&gt;\(\)" replace="getMap()" flags="g">
+                                    <fileset dir="${project.build.directory}/generated-sources/openapi/src/main/java/opencode/sdk/model"
+                                             includes="*.java"/>
+                                </replaceregexp>
+
+                                <echo message="OpenAPI Generator bug fixes applied"/>
+                            </target>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

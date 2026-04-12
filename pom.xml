@@ -27,9 +27,10 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <!-- Dependency Versions -->
-        <spring-boot.version>3.5.12</spring-boot.version>
+        <spring-boot.version>3.5.13</spring-boot.version>
         <lombok.version>1.18.36</lombok.version>
-        <jackson.version>2.18.2</jackson.version>
+        <jackson.version>2.21.1</jackson.version>
+        <jackson.annotation.version>2.21</jackson.annotation.version>
         <slf4j.version>2.0.16</slf4j.version>
         <junit.version>5.11.4</junit.version>
         <assertj.version>3.26.3</assertj.version>

@@ -55,8 +55,8 @@ flowchart TB
 |-----------|---------|---------|
 | **Java** | 21 | Primary language |
 | **Maven** | 3.x | Build and dependency management |
-| **Spring Boot** | 3.5.12 | Framework for Spring Boot starter and examples |
-| **Jackson** | 2.18.2 | JSON serialization/deserialization |
+| **Spring Boot** | 3.5.13 | Framework for Spring Boot starter and examples |
+| **Jackson** | 2.21.1 | JSON serialization/deserialization |
 | **SLF4J** | 2.0.16 | Logging facade |
 | **JUnit** | 5.11.4 | Unit testing framework |
 | **AssertJ** | 3.26.3 | Fluent assertion library |
@@ -97,11 +97,17 @@ flowchart TB
 ## Build Commands
 
 ```bash
-# Build entire project
+# Build entire project from project root
 mvn clean install
 
-# Build specific module
-cd sdk && mvn clean install
+# Build SDK module from project root (also triggers code generation)
+mvn compile -pl sdk -am
+
+# Build SDK module from sdk/ directory
+mvn compile
+
+# Regenerate SDK sources from OpenAPI spec (then compile)
+mvn generate-sources -pl sdk -am
 
 # Run tests
 mvn test
@@ -135,16 +141,31 @@ The SDK is now auto-generated from OpenAPI specification and includes:
 - `ApiException` - API exception handling
 - `ApiResponse<T>` - Generic response wrapper
 
-**Custom Classes** (manual implementations)
+**Custom Classes** (manual implementations in `src/main/java`)
 - `OpenCodeClient` - Custom HTTP client wrapper (in `client/` package)
 - `OpenCodeConfig` - Configuration properties (in `config/` package)
 - `OpenCodeException` - Base runtime exception (in root package)
+- `AnyOf` - Workaround for generator bug with `anyOf: [{}, {"type": "null"}]` schemas (in `model/` package)
 
 **Models** (`opencode.sdk.model`)
 - 150+ auto-generated model classes for requests, responses, and data structures
 - `ApiResponse` - Response model (original, in model package)
 
-**Note:** The SDK uses OpenAPI Generator (v7.10.0) to auto-generate classes in `api/`, `invoker/`, and `model/` packages from the OpenAPI specification. These generated classes should not be manually edited. Custom implementations should go in `client/` and `config/` packages.
+**Note:** The SDK uses OpenAPI Generator (v7.21.0) to auto-generate classes in `api/`, `invoker/`, and `model/` packages from the OpenAPI specification. These generated classes should not be manually edited. Custom implementations should go in `client/`, `config/`, and `model/` packages.
+
+#### OpenAPI Generator Build Pipeline
+
+The SDK build (`mvn compile -pl sdk`) runs three phases automatically:
+
+1. **`openapi-generator-maven-plugin`** — generates Java sources from `sdk/openapi.json` into `target/generated-sources/openapi/`
+2. **`maven-antrun-plugin`** — post-processes generated sources to fix known generator bugs:
+   - Replaces `Map<K,V>.class` → `Map.class` (parameterized type literals are invalid Java)
+   - Replaces `getMap<K,V>()` → `getMap()` (generics in method identifiers are invalid Java)
+3. **`maven-compiler-plugin`** — compiles generated sources + `src/main/java` together
+
+**Known generator bugs requiring manual workarounds:**
+- **Map<K,V>.class syntax** — The generator outputs `Map<String, FooValue>.class` in `anyOf` schemas containing map types. Fixed automatically by the antrun plugin.
+- **Missing `AnyOf` class** — The generator references `AnyOf` for schemas like `anyOf: [{}, {"type": "null"}]` but never generates the class. A manual `AnyOf.java` is maintained in `src/main/java/opencode/sdk/model/`.
 
 ### Spring Boot Starter (`opencode-spring-boot-starter/`)
 - `OpenCodeAutoConfiguration` - Auto-configuration class
@@ -188,7 +209,7 @@ See `docker/opencode/README.md` for setup instructions.
 2. Maintain backward compatibility for public APIs
 3. Follow existing package structure: `opencode.sdk.*`
 4. Use Java's `HttpClient` for HTTP operations
-5. Reference `docker/opencode/openapi.json` for API endpoints
+5. Reference `sdk/openapi.json` for API endpoints (copied from `docker/opencode/openapi.json`)
 
 ### When Working on Spring Boot Starter
 1. Use Lombok for boilerplate reduction
@@ -221,5 +242,5 @@ See `docker/opencode/README.md` for setup instructions.
 
 - [Maven Documentation](https://maven.apache.org/guides/)
 - [Spring Boot Reference](https://docs.spring.io/spring-boot/docs/current/reference/html/)
-- [OpenCode Server API](docker/opencode/openapi.json)
+- [OpenCode Server API](sdk/openapi.json)
 - [Docker Setup](docker/opencode/README.md)
