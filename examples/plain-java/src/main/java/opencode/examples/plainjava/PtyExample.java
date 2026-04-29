@@ -3,8 +3,8 @@ package opencode.examples.plainjava;
 import opencode.examples.plainjava.testing.ExampleContext;
 import opencode.examples.plainjava.testing.ResourceTracker;
 import opencode.examples.plainjava.testing.ResponseValidator;
-import opencode.sdk.client.OpenCodeClient;
-import opencode.sdk.config.OpenCodeConfig;
+import opencode.sdk.api.DefaultApi;
+import opencode.sdk.invoker.ApiClient;
 import opencode.sdk.invoker.ApiException;
 import opencode.sdk.model.Pty;
 import opencode.sdk.model.PtyCreateRequest;
@@ -14,24 +14,25 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
+import java.util.Base64;
 import java.util.List;
 
 public class PtyExample {
 
     private static final Logger logger = LoggerFactory.getLogger(PtyExample.class);
 
-    private final OpenCodeClient client;
+    private final DefaultApi api;
     private final ResponseValidator validator;
     private final ResourceTracker tracker;
 
-    public PtyExample(OpenCodeClient client) {
-        this.client = client;
+    public PtyExample(DefaultApi api) {
+        this.api = api;
         this.validator = null;
         this.tracker = null;
     }
 
     public PtyExample(ExampleContext context) {
-        this.client = context.getClient();
+        this.api = context.getDefaultApi();
         this.validator = context.getValidator();
         this.tracker = context.getResourceTracker();
     }
@@ -76,7 +77,7 @@ public class PtyExample {
     private void listPtySessions() throws ApiException {
         logger.info("\n--- Listing PTY Sessions ---");
 
-        List<Pty> ptys = client.api().ptyList(
+        List<Pty> ptys = api.ptyList(
                 null,  // directory
                 null   // workspace
         );
@@ -107,7 +108,7 @@ public class PtyExample {
         request.setTitle("Example PTY Session");
         request.setCwd(System.getProperty("user.dir"));
 
-        Pty pty = client.api().ptyCreate(
+        Pty pty = api.ptyCreate(
                 null,     // directory
                 null,     // workspace
                 request
@@ -137,7 +138,7 @@ public class PtyExample {
     private void getPty(String ptyId) throws ApiException {
         logger.info("\n--- Getting PTY Details: {} ---", ptyId);
 
-        Pty pty = client.api().ptyGet(
+        Pty pty = api.ptyGet(
                 ptyId,
                 null,  // directory
                 null   // workspace
@@ -159,7 +160,7 @@ public class PtyExample {
         PtyUpdateRequest request = new PtyUpdateRequest();
         request.setSize(size);
 
-        Pty pty = client.api().ptyUpdate(
+        Pty pty = api.ptyUpdate(
                 ptyId,
                 null,     // directory
                 null,     // workspace
@@ -177,7 +178,7 @@ public class PtyExample {
         PtyUpdateRequest request = new PtyUpdateRequest();
         request.setTitle(title);
 
-        Pty pty = client.api().ptyUpdate(
+        Pty pty = api.ptyUpdate(
                 ptyId,
                 null,     // directory
                 null,     // workspace
@@ -192,7 +193,7 @@ public class PtyExample {
     private void removePty(String ptyId) throws ApiException {
         logger.info("\n--- Removing PTY Session: {} ---", ptyId);
 
-        Boolean result = client.api().ptyRemove(
+        Boolean result = api.ptyRemove(
                 ptyId,
                 null,  // directory
                 null   // workspace
@@ -210,17 +211,16 @@ public class PtyExample {
         logger.info("====================");
 
         // Configure the client with Basic Auth
-        OpenCodeConfig config = new OpenCodeConfig();
-        config.setBaseUrl("http://localhost:4096");
-        config.setUsername("opencode");
-        config.setPassword("opencode123");
-
-        // Create the client
-        OpenCodeClient client = new OpenCodeClient(config);
+        ApiClient apiClient = new ApiClient();
+        apiClient.updateBaseUri("http://localhost:4096");
+        String credentials = "opencode:opencode123";
+        String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
+        apiClient.setRequestInterceptor(builder -> builder.header("Authorization", "Basic " + encoded));
+        DefaultApi api = new DefaultApi(apiClient);
 
         try {
             // Run the example
-            PtyExample example = new PtyExample(client);
+            PtyExample example = new PtyExample(api);
             example.demonstratePtyOperations();
 
             logger.info("\n");

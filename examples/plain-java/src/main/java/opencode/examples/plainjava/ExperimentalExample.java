@@ -1,8 +1,10 @@
 package opencode.examples.plainjava;
 
 import opencode.examples.plainjava.testing.ExampleContext;
+import opencode.examples.plainjava.testing.ResourceTracker;
 import opencode.examples.plainjava.testing.ResponseValidator;
-import opencode.sdk.client.OpenCodeClient;
+import opencode.sdk.api.DefaultApi;
+import opencode.sdk.invoker.ApiClient;
 import opencode.sdk.invoker.ApiException;
 import opencode.sdk.model.ExperimentalWorkspaceCreateRequest;
 import opencode.sdk.model.GlobalSession;
@@ -12,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
@@ -19,16 +22,16 @@ public class ExperimentalExample {
 
     private static final Logger logger = LoggerFactory.getLogger(ExperimentalExample.class);
 
-    private final OpenCodeClient client;
+    private final DefaultApi api;
     private final ResponseValidator validator;
 
-    public ExperimentalExample(OpenCodeClient client) {
-        this.client = client;
+    public ExperimentalExample(DefaultApi api) {
+        this.api = api;
         this.validator = null;
     }
 
     public ExperimentalExample(ExampleContext context) {
-        this.client = context.getClient();
+        this.api = context.getDefaultApi();
         this.validator = context.getValidator();
     }
 
@@ -63,7 +66,7 @@ public class ExperimentalExample {
     private void listGlobalSessions() throws ApiException {
         logger.info("\n--- Listing Global Sessions ---");
 
-        List<GlobalSession> sessions = client.api().experimentalSessionList(
+        List<GlobalSession> sessions = api.experimentalSessionList(
                 null,  // directory
                 null,  // workspace
                 null,  // roots
@@ -93,7 +96,7 @@ public class ExperimentalExample {
     private void listWorkspaces() throws ApiException {
         logger.info("\n--- Listing Workspaces ---");
 
-        List<Workspace> workspaces = client.api().experimentalWorkspaceList(
+        List<Workspace> workspaces = api.experimentalWorkspaceList(
                 null,  // directory
                 null   // workspace
         );
@@ -121,7 +124,7 @@ public class ExperimentalExample {
         request.setType("git");
         request.setBranch("main");
 
-        Workspace workspace = client.api().experimentalWorkspaceCreate(
+        Workspace workspace = api.experimentalWorkspaceCreate(
                 null,  // directory
                 null,  // workspace
                 request
@@ -138,7 +141,7 @@ public class ExperimentalExample {
     private void listMcpResources() throws ApiException {
         logger.info("\n--- Listing MCP Resources ---");
 
-        Map<String, McpResource> resources = client.api().experimentalResourceList(
+        Map<String, McpResource> resources = api.experimentalResourceList(
                 null,  // directory
                 null   // workspace
         );
@@ -156,16 +159,15 @@ public class ExperimentalExample {
     public static void main(String[] args) {
         try {
             // Create client configuration
-            opencode.sdk.config.OpenCodeConfig config = new opencode.sdk.config.OpenCodeConfig();
-            config.setBaseUrl("http://localhost:4096");
-            config.setUsername("opencode");
-            config.setPassword("opencode123");
-
-            // Create the client
-            OpenCodeClient client = new OpenCodeClient(config);
+            ApiClient apiClient = new ApiClient();
+            apiClient.updateBaseUri("http://localhost:4096");
+            String credentials = "opencode:opencode123";
+            String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
+            apiClient.setRequestInterceptor(builder -> builder.header("Authorization", "Basic " + encoded));
+            DefaultApi api = new DefaultApi(apiClient);
 
             // Run the example
-            ExperimentalExample example = new ExperimentalExample(client);
+            ExperimentalExample example = new ExperimentalExample(api);
             example.demonstrateExperimentalApis();
 
         } catch (Exception e) {

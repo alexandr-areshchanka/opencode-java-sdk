@@ -3,31 +3,33 @@ package opencode.examples.plainjava;
 import opencode.examples.plainjava.testing.ExampleContext;
 import opencode.examples.plainjava.testing.ResourceTracker;
 import opencode.examples.plainjava.testing.ResponseValidator;
-import opencode.sdk.client.OpenCodeClient;
+import opencode.sdk.api.DefaultApi;
+import opencode.sdk.invoker.ApiClient;
 import opencode.sdk.invoker.ApiException;
 import opencode.sdk.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
+import java.util.Base64;
 import java.util.List;
 
 public class MessageExample {
 
     private static final Logger logger = LoggerFactory.getLogger(MessageExample.class);
 
-    private final OpenCodeClient client;
+    private final DefaultApi api;
     private final ResponseValidator validator;
     private final ResourceTracker tracker;
 
-    public MessageExample(OpenCodeClient client) {
-        this.client = client;
+    public MessageExample(DefaultApi api) {
+        this.api = api;
         this.validator = null;
         this.tracker = null;
     }
 
     public MessageExample(ExampleContext context) {
-        this.client = context.getClient();
+        this.api = context.getDefaultApi();
         this.validator = context.getValidator();
         this.tracker = context.getResourceTracker();
     }
@@ -66,7 +68,7 @@ public class MessageExample {
         SessionCreateRequest request = new SessionCreateRequest();
         request.setTitle("Java Q&A Session");
 
-        Session session = client.api().sessionCreate(
+        Session session = api.sessionCreate(
                 null,  // directory
                 null,  // workspace
                 request
@@ -93,7 +95,7 @@ public class MessageExample {
         SessionPromptRequest request = buildPromptRequest(userMessage);
 
         // Send the prompt and get AI response
-        SessionPrompt200Response response = client.api().sessionPrompt(
+        SessionPrompt200Response response = api.sessionPrompt(
                 sessionId,
                 null,  // directory
                 null,  // workspace
@@ -119,7 +121,7 @@ public class MessageExample {
     private void listMessages(String sessionId) throws ApiException {
         logger.info("\n--- Listing Messages in Session ---");
 
-        List<SessionMessages200ResponseInner> messages = client.api().sessionMessages(
+        List<SessionMessages200ResponseInner> messages = api.sessionMessages(
                 sessionId,
                 null,   // directory
                 null,   // workspace
@@ -180,21 +182,20 @@ public class MessageExample {
         logger.info("Starting Message Example");
 
         // Configure the client with Basic Auth
-        opencode.sdk.config.OpenCodeConfig config = new opencode.sdk.config.OpenCodeConfig();
-        config.setBaseUrl("http://localhost:4096");
-        config.setUsername("opencode");
-        config.setPassword("opencode123");
-
-        // Create the client
-        OpenCodeClient client = new OpenCodeClient(config);
+        ApiClient apiClient = new ApiClient();
+        apiClient.updateBaseUri("http://localhost:4096");
+        String credentials = "opencode:opencode123";
+        String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
+        apiClient.setRequestInterceptor(builder -> builder.header("Authorization", "Basic " + encoded));
+        DefaultApi api = new DefaultApi(apiClient);
 
         try {
             // Verify connection with health check
-            var health = client.api().globalHealth();
+            var health = api.globalHealth();
             logger.info("Connected to OpenCode server (version: {})", health.getVersion());
 
             // Run the example
-            MessageExample example = new MessageExample(client);
+            MessageExample example = new MessageExample(api);
             example.demonstrateMessaging();
 
             logger.info("Message Example completed");

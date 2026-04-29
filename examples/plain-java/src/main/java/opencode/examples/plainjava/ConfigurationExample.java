@@ -2,8 +2,8 @@ package opencode.examples.plainjava;
 
 import opencode.examples.plainjava.testing.ExampleContext;
 import opencode.examples.plainjava.testing.ResponseValidator;
-import opencode.sdk.client.OpenCodeClient;
-import opencode.sdk.config.OpenCodeConfig;
+import opencode.sdk.api.DefaultApi;
+import opencode.sdk.invoker.ApiClient;
 import opencode.sdk.invoker.ApiException;
 import opencode.sdk.model.Config;
 import opencode.sdk.model.ConfigProviders200Response;
@@ -12,6 +12,7 @@ import opencode.sdk.model.Provider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
@@ -19,16 +20,16 @@ public class ConfigurationExample {
 
     private static final Logger logger = LoggerFactory.getLogger(ConfigurationExample.class);
 
-    private final OpenCodeClient client;
+    private final DefaultApi api;
     private final ResponseValidator validator;
 
-    public ConfigurationExample(OpenCodeClient client) {
-        this.client = client;
+    public ConfigurationExample(DefaultApi api) {
+        this.api = api;
         this.validator = null;
     }
 
     public ConfigurationExample(ExampleContext context) {
-        this.client = context.getClient();
+        this.api = context.getDefaultApi();
         this.validator = context.getValidator();
     }
 
@@ -60,7 +61,7 @@ public class ConfigurationExample {
     private void getProjectConfig() throws ApiException {
         logger.info("\n--- Retrieving Project Configuration ---");
 
-        Config config = client.api().configGet(
+        Config config = api.configGet(
                 null,  // directory
                 null   // workspace
         );
@@ -90,7 +91,7 @@ public class ConfigurationExample {
     private void getGlobalConfig() throws ApiException {
         logger.info("\n--- Retrieving Global Configuration ---");
 
-        Config config = client.api().globalConfigGet();
+        Config config = api.globalConfigGet();
 
         if (validator != null) {
             validator.validateNonNull(config, "global config");
@@ -114,7 +115,7 @@ public class ConfigurationExample {
     private void listProviders() throws ApiException {
         logger.info("\n--- Listing Configuration Providers ---");
 
-        ConfigProviders200Response response = client.api().configProviders(
+        ConfigProviders200Response response = api.configProviders(
                 null,  // directory
                 null   // workspace
         );
@@ -161,7 +162,7 @@ public class ConfigurationExample {
         Config configUpdate = new Config();
         configUpdate.setLogLevel(LogLevel.DEBUG);
 
-        Config updatedConfig = client.api().configUpdate(
+        Config updatedConfig = api.configUpdate(
                 null,           // directory
                 null,           // workspace
                 configUpdate    // config changes
@@ -182,17 +183,16 @@ public class ConfigurationExample {
         logger.info("============================");
 
         // Configure the client with Basic Auth
-        OpenCodeConfig config = new OpenCodeConfig();
-        config.setBaseUrl("http://localhost:4096");
-        config.setUsername("opencode");
-        config.setPassword("opencode123");
-
-        // Create the client
-        OpenCodeClient client = new OpenCodeClient(config);
+        ApiClient apiClient = new ApiClient();
+        apiClient.updateBaseUri("http://localhost:4096");
+        String credentials = "opencode:opencode123";
+        String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
+        apiClient.setRequestInterceptor(builder -> builder.header("Authorization", "Basic " + encoded));
+        DefaultApi api = new DefaultApi(apiClient);
 
         try {
             // Run the example
-            ConfigurationExample example = new ConfigurationExample(client);
+            ConfigurationExample example = new ConfigurationExample(api);
             example.demonstrateConfiguration();
 
             logger.info("\n");

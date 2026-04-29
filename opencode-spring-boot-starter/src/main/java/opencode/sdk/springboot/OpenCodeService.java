@@ -1,6 +1,5 @@
 package opencode.sdk.springboot;
 
-import lombok.RequiredArgsConstructor;
 import opencode.sdk.api.DefaultApi;
 import opencode.sdk.api.SessionApi;
 import opencode.sdk.invoker.ApiClient;
@@ -9,11 +8,15 @@ import opencode.sdk.model.GlobalHealth200Response;
 import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
 public class OpenCodeService {
 
     private final DefaultApi defaultApi;
     private final ApiClient apiClient;
+
+    public OpenCodeService(DefaultApi defaultApi, ApiClient apiClient) {
+        this.defaultApi = defaultApi;
+        this.apiClient = apiClient;
+    }
 
     public GlobalHealth200Response getHealth() throws ApiException {
         return defaultApi.globalHealth();

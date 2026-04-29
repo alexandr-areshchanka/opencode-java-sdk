@@ -3,8 +3,8 @@ package opencode.examples.plainjava;
 import opencode.examples.plainjava.testing.ExampleContext;
 import opencode.examples.plainjava.testing.ResourceTracker;
 import opencode.examples.plainjava.testing.ResponseValidator;
+import opencode.sdk.api.DefaultApi;
 import opencode.sdk.api.SessionApi;
-import opencode.sdk.client.OpenCodeClient;
 import opencode.sdk.invoker.ApiClient;
 import opencode.sdk.invoker.ApiException;
 import opencode.sdk.model.Session;
@@ -14,28 +14,30 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
+import java.util.Base64;
 import java.util.List;
 
 public class SessionCrudExample {
 
     private static final Logger logger = LoggerFactory.getLogger(SessionCrudExample.class);
 
-    private final OpenCodeClient client;
+    private final DefaultApi api;
+    private final ApiClient apiClient;
     private final SessionApi sessionApi;
     private final ResponseValidator validator;
     private final ResourceTracker tracker;
 
-    public SessionCrudExample(OpenCodeClient client) {
-        this.client = client;
-        ApiClient apiClient = client.getApiClient();
+    public SessionCrudExample(DefaultApi api, ApiClient apiClient) {
+        this.api = api;
+        this.apiClient = apiClient;
         this.sessionApi = new SessionApi(apiClient);
         this.validator = null;
         this.tracker = null;
     }
 
     public SessionCrudExample(ExampleContext context) {
-        this.client = context.getClient();
-        ApiClient apiClient = client.getApiClient();
+        this.api = context.getDefaultApi();
+        this.apiClient = context.getApiClient();
         this.sessionApi = new SessionApi(apiClient);
         this.validator = context.getValidator();
         this.tracker = context.getResourceTracker();
@@ -76,7 +78,7 @@ public class SessionCrudExample {
     private void listSessions() throws ApiException {
         logger.info("\n--- Listing Sessions ---");
 
-        List<Session> sessions = client.api().sessionList(
+        List<Session> sessions = api.sessionList(
                 null,  // directory
                 null,  // workspace
                 null,  // roots - only root sessions
@@ -107,7 +109,7 @@ public class SessionCrudExample {
         SessionCreateRequest request = new SessionCreateRequest();
         request.setTitle(title);
 
-        Session session = client.api().sessionCreate(
+        Session session = api.sessionCreate(
                 null,  // directory
                 null,  // workspace
                 request
@@ -155,7 +157,7 @@ public class SessionCrudExample {
         SessionUpdateRequest request = new SessionUpdateRequest();
         request.setTitle(newTitle);
 
-        client.api().sessionUpdate(
+        api.sessionUpdate(
                 sessionId,
                 null,  // directory
                 null,  // workspace
@@ -168,7 +170,7 @@ public class SessionCrudExample {
     private void deleteSession(String sessionId) throws ApiException {
         logger.info("\n--- Deleting Session: {} ---", sessionId);
 
-        Boolean result = client.api().sessionDelete(
+        Boolean result = api.sessionDelete(
                 sessionId,
                 null,  // directory
                 null   // workspace
@@ -185,21 +187,20 @@ public class SessionCrudExample {
         logger.info("Starting Session CRUD Example");
 
         // Configure the client with Basic Auth
-        opencode.sdk.config.OpenCodeConfig config = new opencode.sdk.config.OpenCodeConfig();
-        config.setBaseUrl("http://localhost:4096");
-        config.setUsername("opencode");
-        config.setPassword("opencode123");
-
-        // Create the client
-        OpenCodeClient client = new OpenCodeClient(config);
+        ApiClient apiClient = new ApiClient();
+        apiClient.updateBaseUri("http://localhost:4096");
+        String credentials = "opencode:opencode123";
+        String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
+        apiClient.setRequestInterceptor(builder -> builder.header("Authorization", "Basic " + encoded));
+        DefaultApi api = new DefaultApi(apiClient);
 
         try {
             // Verify connection with health check
-            var health = client.api().globalHealth();
+            var health = api.globalHealth();
             logger.info("Connected to OpenCode server (version: {})", health.getVersion());
 
             // Run the example
-            SessionCrudExample example = new SessionCrudExample(client);
+            SessionCrudExample example = new SessionCrudExample(api, apiClient);
             example.demonstrateSessionCrud();
 
             logger.info("Session CRUD Example completed");

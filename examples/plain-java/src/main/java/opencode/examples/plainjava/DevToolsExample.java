@@ -2,30 +2,31 @@ package opencode.examples.plainjava;
 
 import opencode.examples.plainjava.testing.ExampleContext;
 import opencode.examples.plainjava.testing.ResponseValidator;
-import opencode.sdk.client.OpenCodeClient;
-import opencode.sdk.config.OpenCodeConfig;
+import opencode.sdk.api.DefaultApi;
+import opencode.sdk.invoker.ApiClient;
 import opencode.sdk.invoker.ApiException;
 import opencode.sdk.model.FormatterStatus;
 import opencode.sdk.model.LSPStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Base64;
 import java.util.List;
 
 public class DevToolsExample {
 
     private static final Logger logger = LoggerFactory.getLogger(DevToolsExample.class);
 
-    private final OpenCodeClient client;
+    private final DefaultApi api;
     private final ResponseValidator validator;
 
-    public DevToolsExample(OpenCodeClient client) {
-        this.client = client;
+    public DevToolsExample(DefaultApi api) {
+        this.api = api;
         this.validator = null;
     }
 
     public DevToolsExample(ExampleContext context) {
-        this.client = context.getClient();
+        this.api = context.getDefaultApi();
         this.validator = context.getValidator();
     }
 
@@ -51,7 +52,7 @@ public class DevToolsExample {
     private void getLspStatus() throws ApiException {
         logger.info("\n--- Getting LSP Server Status ---");
 
-        List<LSPStatus> lspStatuses = client.api().lspStatus(
+        List<LSPStatus> lspStatuses = api.lspStatus(
                 null,  // directory
                 null   // workspace
         );
@@ -77,7 +78,7 @@ public class DevToolsExample {
     private void getFormatterStatus() throws ApiException {
         logger.info("\n--- Getting Formatter Status ---");
 
-        List<FormatterStatus> formatterStatuses = client.api().formatterStatus(
+        List<FormatterStatus> formatterStatuses = api.formatterStatus(
                 null,  // directory
                 null   // workspace
         );
@@ -103,17 +104,16 @@ public class DevToolsExample {
         logger.info("=========================");
 
         // Configure the client with Basic Auth
-        OpenCodeConfig config = new OpenCodeConfig();
-        config.setBaseUrl("http://localhost:4096");
-        config.setUsername("opencode");
-        config.setPassword("opencode123");
-
-        // Create the client
-        OpenCodeClient client = new OpenCodeClient(config);
+        ApiClient apiClient = new ApiClient();
+        apiClient.updateBaseUri("http://localhost:4096");
+        String credentials = "opencode:opencode123";
+        String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
+        apiClient.setRequestInterceptor(builder -> builder.header("Authorization", "Basic " + encoded));
+        DefaultApi api = new DefaultApi(apiClient);
 
         try {
             // Run the example
-            DevToolsExample example = new DevToolsExample(client);
+            DevToolsExample example = new DevToolsExample(api);
             example.demonstrateDevTools();
 
             logger.info("\n");

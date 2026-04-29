@@ -2,8 +2,8 @@ package opencode.examples.plainjava;
 
 import opencode.examples.plainjava.testing.ExampleContext;
 import opencode.examples.plainjava.testing.ResponseValidator;
-import opencode.sdk.client.OpenCodeClient;
-import opencode.sdk.config.OpenCodeConfig;
+import opencode.sdk.api.DefaultApi;
+import opencode.sdk.invoker.ApiClient;
 import opencode.sdk.invoker.ApiException;
 import opencode.sdk.model.ProviderAuthMethod;
 import opencode.sdk.model.ProviderList200Response;
@@ -11,6 +11,7 @@ import opencode.sdk.model.ProviderList200ResponseAllInner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
@@ -18,16 +19,16 @@ public class ProviderExample {
 
     private static final Logger logger = LoggerFactory.getLogger(ProviderExample.class);
 
-    private final OpenCodeClient client;
+    private final DefaultApi api;
     private final ResponseValidator validator;
 
-    public ProviderExample(OpenCodeClient client) {
-        this.client = client;
+    public ProviderExample(DefaultApi api) {
+        this.api = api;
         this.validator = null;
     }
 
     public ProviderExample(ExampleContext context) {
-        this.client = context.getClient();
+        this.api = context.getDefaultApi();
         this.validator = context.getValidator();
     }
 
@@ -53,7 +54,7 @@ public class ProviderExample {
     private void listProviders() throws ApiException {
         logger.info("\n--- Listing AI Providers ---");
 
-        ProviderList200Response response = client.api().providerList(
+        ProviderList200Response response = api.providerList(
                 null,  // directory
                 null   // workspace
         );
@@ -104,7 +105,7 @@ public class ProviderExample {
     private void getAuthMethods() throws ApiException {
         logger.info("\n--- Getting Provider Auth Methods ---");
 
-        Map<String, List<ProviderAuthMethod>> authMethods = client.api().providerAuth(
+        Map<String, List<ProviderAuthMethod>> authMethods = api.providerAuth(
                 null,  // directory
                 null   // workspace
         );
@@ -140,17 +141,16 @@ public class ProviderExample {
         logger.info("========================");
 
         // Configure the client with Basic Auth
-        OpenCodeConfig config = new OpenCodeConfig();
-        config.setBaseUrl("http://localhost:4096");
-        config.setUsername("opencode");
-        config.setPassword("opencode123");
-
-        // Create the client
-        OpenCodeClient client = new OpenCodeClient(config);
+        ApiClient apiClient = new ApiClient();
+        apiClient.updateBaseUri("http://localhost:4096");
+        String credentials = "opencode:opencode123";
+        String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
+        apiClient.setRequestInterceptor(builder -> builder.header("Authorization", "Basic " + encoded));
+        DefaultApi api = new DefaultApi(apiClient);
 
         try {
             // Run the example
-            ProviderExample example = new ProviderExample(client);
+            ProviderExample example = new ProviderExample(api);
             example.demonstrateProviders();
 
             logger.info("\n");

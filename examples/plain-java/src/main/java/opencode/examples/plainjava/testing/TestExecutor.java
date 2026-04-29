@@ -1,11 +1,12 @@
 package opencode.examples.plainjava.testing;
 
-import opencode.sdk.client.OpenCodeClient;
-import opencode.sdk.config.OpenCodeConfig;
+import opencode.sdk.api.DefaultApi;
+import opencode.sdk.invoker.ApiClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Constructor;
+import java.util.Base64;
 import java.util.List;
 
 public class TestExecutor {
@@ -91,25 +92,26 @@ public class TestExecutor {
     }
 
     private ExampleContext createContext() {
-        OpenCodeConfig sdkConfig = new OpenCodeConfig();
-        sdkConfig.setBaseUrl(config.getBaseUrl());
-        sdkConfig.setUsername(config.getUsername());
-        sdkConfig.setPassword(config.getPassword());
-        sdkConfig.setProvider(config.getProvider());
-        sdkConfig.setModel(config.getModel());
-        sdkConfig.setProviderApiKey(config.getProviderApiKey());
+        ApiClient apiClient = new ApiClient();
+        apiClient.updateBaseUri(config.getBaseUrl());
 
-        OpenCodeClient client = new OpenCodeClient(sdkConfig);
+        if (config.getUsername() != null && config.getPassword() != null) {
+            String credentials = config.getUsername() + ":" + config.getPassword();
+            String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
+            apiClient.setRequestInterceptor(builder -> builder.header("Authorization", "Basic " + encoded));
+        }
+
+        DefaultApi defaultApi = new DefaultApi(apiClient);
 
         // Initialize cleanup manager
         if (cleanupManager == null) {
-            cleanupManager = new CleanupManager(client, testLogger);
+            cleanupManager = new CleanupManager(defaultApi, testLogger);
         }
 
         ResourceTracker tracker = new ResourceTracker();
         ResponseValidator validator = new ResponseValidator();
 
-        return new ExampleContext(client, config, tracker, validator);
+        return new ExampleContext(defaultApi, apiClient, config, tracker, validator);
     }
 
     private Object createExampleInstance(Class<?> exampleClass, ExampleContext context) throws Exception {
@@ -118,10 +120,10 @@ public class TestExecutor {
             Constructor<?> contextConstructor = exampleClass.getConstructor(ExampleContext.class);
             return contextConstructor.newInstance(context);
         } catch (NoSuchMethodException e) {
-            // Fall back to constructor that accepts OpenCodeClient
+            // Fall back to constructor that accepts DefaultApi
             try {
-                Constructor<?> clientConstructor = exampleClass.getConstructor(OpenCodeClient.class);
-                return clientConstructor.newInstance(context.getClient());
+                Constructor<?> apiConstructor = exampleClass.getConstructor(DefaultApi.class);
+                return apiConstructor.newInstance(context.getDefaultApi());
             } catch (NoSuchMethodException ex) {
                 throw new RuntimeException("No suitable constructor found for example class: " + exampleClass.getName());
             }

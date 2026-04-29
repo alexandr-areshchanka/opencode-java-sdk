@@ -2,30 +2,31 @@ package opencode.examples.plainjava;
 
 import opencode.examples.plainjava.testing.ExampleContext;
 import opencode.examples.plainjava.testing.ResponseValidator;
-import opencode.sdk.client.OpenCodeClient;
-import opencode.sdk.config.OpenCodeConfig;
+import opencode.sdk.api.DefaultApi;
+import opencode.sdk.invoker.ApiClient;
 import opencode.sdk.invoker.ApiException;
 import opencode.sdk.model.Project;
 import opencode.sdk.model.ProjectUpdateRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Base64;
 import java.util.List;
 
 public class ProjectExample {
 
     private static final Logger logger = LoggerFactory.getLogger(ProjectExample.class);
 
-    private final OpenCodeClient client;
+    private final DefaultApi api;
     private final ResponseValidator validator;
 
-    public ProjectExample(OpenCodeClient client) {
-        this.client = client;
+    public ProjectExample(DefaultApi api) {
+        this.api = api;
         this.validator = null;
     }
 
     public ProjectExample(ExampleContext context) {
-        this.client = context.getClient();
+        this.api = context.getDefaultApi();
         this.validator = context.getValidator();
     }
 
@@ -56,7 +57,7 @@ public class ProjectExample {
     private void listProjects() throws ApiException {
         logger.info("\n--- Listing All Projects ---");
 
-        List<Project> projects = client.api().projectList(
+        List<Project> projects = api.projectList(
                 null,  // directory
                 null   // workspace
         );
@@ -92,7 +93,7 @@ public class ProjectExample {
     private Project getCurrentProject() throws ApiException {
         logger.info("\n--- Retrieving Current Project ---");
 
-        Project project = client.api().projectCurrent(
+        Project project = api.projectCurrent(
                 null,  // directory
                 null   // workspace
         );
@@ -128,7 +129,7 @@ public class ProjectExample {
         ProjectUpdateRequest updateRequest = new ProjectUpdateRequest();
         updateRequest.setName("Updated Project Name");
 
-        Project updatedProject = client.api().projectUpdate(
+        Project updatedProject = api.projectUpdate(
                 projectId,      // projectID (required)
                 null,           // directory
                 null,           // workspace
@@ -152,17 +153,16 @@ public class ProjectExample {
         logger.info("========================");
 
         // Configure the client with Basic Auth
-        OpenCodeConfig config = new OpenCodeConfig();
-        config.setBaseUrl("http://localhost:4096");
-        config.setUsername("opencode");
-        config.setPassword("opencode123");
-
-        // Create the client
-        OpenCodeClient client = new OpenCodeClient(config);
+        ApiClient apiClient = new ApiClient();
+        apiClient.updateBaseUri("http://localhost:4096");
+        String credentials = "opencode:opencode123";
+        String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
+        apiClient.setRequestInterceptor(builder -> builder.header("Authorization", "Basic " + encoded));
+        DefaultApi api = new DefaultApi(apiClient);
 
         try {
             // Run the example
-            ProjectExample example = new ProjectExample(client);
+            ProjectExample example = new ProjectExample(api);
             example.demonstrateProjectOperations();
 
             logger.info("\n");

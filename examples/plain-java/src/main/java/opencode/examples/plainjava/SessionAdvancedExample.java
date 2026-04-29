@@ -3,37 +3,38 @@ package opencode.examples.plainjava;
 import opencode.examples.plainjava.testing.ExampleContext;
 import opencode.examples.plainjava.testing.ResourceTracker;
 import opencode.examples.plainjava.testing.ResponseValidator;
+import opencode.sdk.api.DefaultApi;
 import opencode.sdk.api.SessionApi;
-import opencode.sdk.client.OpenCodeClient;
-import opencode.sdk.config.OpenCodeConfig;
 import opencode.sdk.invoker.ApiClient;
 import opencode.sdk.invoker.ApiException;
 import opencode.sdk.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Base64;
 import java.util.List;
 
 public class SessionAdvancedExample {
 
     private static final Logger logger = LoggerFactory.getLogger(SessionAdvancedExample.class);
 
-    private final OpenCodeClient client;
+    private final DefaultApi api;
+    private final ApiClient apiClient;
     private final SessionApi sessionApi;
     private final ResponseValidator validator;
     private final ResourceTracker tracker;
 
-    public SessionAdvancedExample(OpenCodeClient client) {
-        this.client = client;
-        ApiClient apiClient = client.getApiClient();
+    public SessionAdvancedExample(DefaultApi api, ApiClient apiClient) {
+        this.api = api;
+        this.apiClient = apiClient;
         this.sessionApi = new SessionApi(apiClient);
         this.validator = null;
         this.tracker = null;
     }
 
     public SessionAdvancedExample(ExampleContext context) {
-        this.client = context.getClient();
-        ApiClient apiClient = client.getApiClient();
+        this.api = context.getDefaultApi();
+        this.apiClient = context.getApiClient();
         this.sessionApi = new SessionApi(apiClient);
         this.validator = context.getValidator();
         this.tracker = context.getResourceTracker();
@@ -89,7 +90,7 @@ public class SessionAdvancedExample {
         SessionCreateRequest request = new SessionCreateRequest();
         request.setTitle(title);
 
-        Session session = client.api().sessionCreate(
+        Session session = api.sessionCreate(
                 null,
                 null,
                 request
@@ -114,7 +115,7 @@ public class SessionAdvancedExample {
         SessionForkRequest request = new SessionForkRequest();
         request.setMessageID(null);
 
-        Session forkedSession = client.api().sessionFork(
+        Session forkedSession = api.sessionFork(
                 sessionId,
                 null,
                 null,
@@ -173,7 +174,7 @@ public class SessionAdvancedExample {
     private void shareSession(String sessionId) throws ApiException {
         logger.info("\n--- Sharing Session: {} ---", sessionId);
 
-        Session session = client.api().sessionShare(
+        Session session = api.sessionShare(
                 sessionId,
                 null,
                 null
@@ -189,7 +190,7 @@ public class SessionAdvancedExample {
     private void unshareSession(String sessionId) throws ApiException {
         logger.info("\n--- Unsharing Session: {} ---", sessionId);
 
-        Session session = client.api().sessionUnshare(
+        Session session = api.sessionUnshare(
                 sessionId,
                 null,
                 null
@@ -206,7 +207,7 @@ public class SessionAdvancedExample {
         request.setModelID("glm-4.7");
         request.setAuto(true);
 
-        Boolean result = client.api().sessionSummarize(
+        Boolean result = api.sessionSummarize(
                 sessionId,
                 null,
                 null,
@@ -223,7 +224,7 @@ public class SessionAdvancedExample {
     private void abortSession(String sessionId) throws ApiException {
         logger.info("\n--- Aborting Session Processing: {} ---", sessionId);
 
-        Boolean result = client.api().sessionAbort(
+        Boolean result = api.sessionAbort(
                 sessionId,
                 null,
                 null
@@ -243,7 +244,7 @@ public class SessionAdvancedExample {
         request.setMessageID("message-id-to-revert-to");
         request.setPartID(null);
 
-        Session session = client.api().sessionRevert(
+        Session session = api.sessionRevert(
                 sessionId,
                 null,
                 null,
@@ -256,7 +257,7 @@ public class SessionAdvancedExample {
     private void unrevertSession(String sessionId) throws ApiException {
         logger.info("\n--- Unreverting Session: {} ---", sessionId);
 
-        Session session = client.api().sessionUnrevert(
+        Session session = api.sessionUnrevert(
                 sessionId,
                 null,
                 null
@@ -268,14 +269,14 @@ public class SessionAdvancedExample {
     public static void main(String[] args) {
         try {
             // Configure the client
-            OpenCodeConfig config = new OpenCodeConfig();
-            config.setBaseUrl("http://localhost:4096");
-            config.setUsername("opencode");
-            config.setPassword("opencode123");
+            ApiClient apiClient = new ApiClient();
+            apiClient.updateBaseUri("http://localhost:4096");
+            String credentials = "opencode:opencode123";
+            String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
+            apiClient.setRequestInterceptor(builder -> builder.header("Authorization", "Basic " + encoded));
+            DefaultApi api = new DefaultApi(apiClient);
 
-            OpenCodeClient client = new OpenCodeClient(config);
-
-            SessionAdvancedExample example = new SessionAdvancedExample(client);
+            SessionAdvancedExample example = new SessionAdvancedExample(api, apiClient);
             example.demonstrateAdvancedSessionOperations();
 
         } catch (Exception e) {

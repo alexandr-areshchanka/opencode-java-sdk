@@ -2,25 +2,27 @@ package opencode.examples.plainjava;
 
 import opencode.examples.plainjava.testing.ExampleContext;
 import opencode.examples.plainjava.testing.ResponseValidator;
-import opencode.sdk.client.OpenCodeClient;
-import opencode.sdk.config.OpenCodeConfig;
+import opencode.sdk.api.DefaultApi;
+import opencode.sdk.invoker.ApiClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Base64;
 
 public class InstanceExample {
 
     private static final Logger logger = LoggerFactory.getLogger(InstanceExample.class);
 
-    private final OpenCodeClient client;
+    private final DefaultApi api;
     private final ResponseValidator validator;
 
-    public InstanceExample(OpenCodeClient client) {
-        this.client = client;
+    public InstanceExample(DefaultApi api) {
+        this.api = api;
         this.validator = null;
     }
 
     public InstanceExample(ExampleContext context) {
-        this.client = context.getClient();
+        this.api = context.getDefaultApi();
         this.validator = context.getValidator();
     }
 
@@ -70,7 +72,7 @@ public class InstanceExample {
         logger.info("  - Terminates any active sessions within that instance");
         logger.info("");
         logger.info("Example usage:");
-        logger.info("  Boolean result = client.api().instanceDispose(null, null);");
+        logger.info("  Boolean result = api.instanceDispose(null, null);");
         logger.info("  if (result) {");
         logger.info("      logger.info(\"Instance disposed successfully\");");
         logger.info("  }");
@@ -90,7 +92,7 @@ public class InstanceExample {
         logger.warn("⚠️  This is the most DESTRUCTIVE operation and should be used with extreme caution!");
         logger.info("");
         logger.info("Example usage:");
-        logger.info("  Boolean result = client.api().globalDispose();");
+        logger.info("  Boolean result = api.globalDispose();");
         logger.info("  if (result) {");
         logger.info("      logger.info(\"All instances disposed successfully\");");
         logger.info("  }");
@@ -101,17 +103,16 @@ public class InstanceExample {
         logger.info("======================================");
 
         // Configure the client with Basic Auth
-        OpenCodeConfig config = new OpenCodeConfig();
-        config.setBaseUrl("http://localhost:4096");
-        config.setUsername("opencode");
-        config.setPassword("opencode123");
-
-        // Create the client
-        OpenCodeClient client = new OpenCodeClient(config);
+        ApiClient apiClient = new ApiClient();
+        apiClient.updateBaseUri("http://localhost:4096");
+        String credentials = "opencode:opencode123";
+        String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
+        apiClient.setRequestInterceptor(builder -> builder.header("Authorization", "Basic " + encoded));
+        DefaultApi api = new DefaultApi(apiClient);
 
         try {
             // Run the example
-            InstanceExample example = new InstanceExample(client);
+            InstanceExample example = new InstanceExample(api);
             example.demonstrateInstanceManagement();
 
             logger.info("\n");

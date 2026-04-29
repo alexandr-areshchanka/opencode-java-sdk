@@ -3,30 +3,32 @@ package opencode.examples.plainjava;
 import opencode.examples.plainjava.testing.ExampleContext;
 import opencode.examples.plainjava.testing.ResourceTracker;
 import opencode.examples.plainjava.testing.ResponseValidator;
-import opencode.sdk.client.OpenCodeClient;
+import opencode.sdk.api.DefaultApi;
+import opencode.sdk.invoker.ApiClient;
 import opencode.sdk.invoker.ApiException;
 import opencode.sdk.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Base64;
 import java.util.List;
 
 public class FileOperationsExample {
 
     private static final Logger logger = LoggerFactory.getLogger(FileOperationsExample.class);
 
-    private final OpenCodeClient client;
+    private final DefaultApi api;
     private final ResponseValidator validator;
     private final ResourceTracker tracker;
 
-    public FileOperationsExample(OpenCodeClient client) {
-        this.client = client;
+    public FileOperationsExample(DefaultApi api) {
+        this.api = api;
         this.validator = null;
         this.tracker = null;
     }
 
     public FileOperationsExample(ExampleContext context) {
-        this.client = context.getClient();
+        this.api = context.getDefaultApi();
         this.validator = context.getValidator();
         this.tracker = context.getResourceTracker();
     }
@@ -65,7 +67,7 @@ public class FileOperationsExample {
     private void listFiles(String path) throws ApiException {
         logger.info("\n--- Listing Files in Directory: {} ---", path);
 
-        List<FileNode> files = client.api().fileList(
+        List<FileNode> files = api.fileList(
                 path,
                 null,  // directory
                 null   // workspace
@@ -99,7 +101,7 @@ public class FileOperationsExample {
     private void readFile(String path) throws ApiException {
         logger.info("\n--- Reading File: {} ---", path);
 
-        FileContent content = client.api().fileRead(
+        FileContent content = api.fileRead(
                 path,
                 null,  // directory
                 null   // workspace
@@ -124,7 +126,7 @@ public class FileOperationsExample {
     private void getFileStatus() throws ApiException {
         logger.info("\n--- Getting Git File Status ---");
 
-        List<ModelFile> files = client.api().fileStatus(
+        List<ModelFile> files = api.fileStatus(
                 null,  // directory
                 null   // workspace
         );
@@ -150,7 +152,7 @@ public class FileOperationsExample {
     private void findFiles(String pattern) throws ApiException {
         logger.info("\n--- Finding Files: {} ---", pattern);
 
-        List<String> files = client.api().findFiles(
+        List<String> files = api.findFiles(
                 pattern,
                 null,  // directory
                 null,  // workspace
@@ -172,7 +174,7 @@ public class FileOperationsExample {
     private void findText(String searchPattern) throws ApiException {
         logger.info("\n--- Searching Text: {} ---", searchPattern);
 
-        List<FindText200ResponseInner> results = client.api().findText(
+        List<FindText200ResponseInner> results = api.findText(
                 searchPattern,
                 null,  // directory
                 null   // workspace
@@ -199,7 +201,7 @@ public class FileOperationsExample {
     private void findSymbols(String query) throws ApiException {
         logger.info("\n--- Finding Symbols: {} ---", query);
 
-        List<Symbol> symbols = client.api().findSymbols(
+        List<Symbol> symbols = api.findSymbols(
                 query,
                 null,  // directory
                 null   // workspace
@@ -233,21 +235,20 @@ public class FileOperationsExample {
         logger.info("Starting File Operations Example");
 
         // Configure the client with Basic Auth
-        opencode.sdk.config.OpenCodeConfig config = new opencode.sdk.config.OpenCodeConfig();
-        config.setBaseUrl("http://localhost:4096");
-        config.setUsername("opencode");
-        config.setPassword("opencode123");
-
-        // Create the client
-        OpenCodeClient client = new OpenCodeClient(config);
+        ApiClient apiClient = new ApiClient();
+        apiClient.updateBaseUri("http://localhost:4096");
+        String credentials = "opencode:opencode123";
+        String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
+        apiClient.setRequestInterceptor(builder -> builder.header("Authorization", "Basic " + encoded));
+        DefaultApi api = new DefaultApi(apiClient);
 
         try {
             // Verify connection with health check
-            var health = client.api().globalHealth();
+            var health = api.globalHealth();
             logger.info("Connected to OpenCode server (version: {})", health.getVersion());
 
             // Run the example
-            FileOperationsExample example = new FileOperationsExample(client);
+            FileOperationsExample example = new FileOperationsExample(api);
             example.demonstrateFileOperations();
 
         } catch (ApiException e) {

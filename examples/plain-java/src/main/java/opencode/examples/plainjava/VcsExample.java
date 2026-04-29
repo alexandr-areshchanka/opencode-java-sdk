@@ -2,8 +2,8 @@ package opencode.examples.plainjava;
 
 import opencode.examples.plainjava.testing.ExampleContext;
 import opencode.examples.plainjava.testing.ResponseValidator;
-import opencode.sdk.client.OpenCodeClient;
-import opencode.sdk.config.OpenCodeConfig;
+import opencode.sdk.api.DefaultApi;
+import opencode.sdk.invoker.ApiClient;
 import opencode.sdk.invoker.ApiException;
 import opencode.sdk.model.VcsInfo;
 import opencode.sdk.model.Worktree;
@@ -12,22 +12,23 @@ import opencode.sdk.model.WorktreeRemoveInput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Base64;
 import java.util.List;
 
 public class VcsExample {
 
     private static final Logger logger = LoggerFactory.getLogger(VcsExample.class);
 
-    private final OpenCodeClient client;
+    private final DefaultApi api;
     private final ResponseValidator validator;
 
-    public VcsExample(OpenCodeClient client) {
-        this.client = client;
+    public VcsExample(DefaultApi api) {
+        this.api = api;
         this.validator = null;
     }
 
     public VcsExample(ExampleContext context) {
-        this.client = context.getClient();
+        this.api = context.getDefaultApi();
         this.validator = context.getValidator();
     }
 
@@ -62,7 +63,7 @@ public class VcsExample {
     private void getVcsInfo() throws ApiException {
         logger.info("\n--- Getting VCS Info ---");
 
-        VcsInfo vcsInfo = client.api().vcsGet(
+        VcsInfo vcsInfo = api.vcsGet(
                 null,  // directory
                 null   // workspace
         );
@@ -79,7 +80,7 @@ public class VcsExample {
     private void listWorktrees() throws ApiException {
         logger.info("\n--- Listing Worktrees ---");
 
-        List<String> worktrees = client.api().worktreeList(
+        List<String> worktrees = api.worktreeList(
                 null,  // directory
                 null   // workspace
         );
@@ -102,7 +103,7 @@ public class VcsExample {
             input.setName(name);
             // startCommand is optional - leaving it null
 
-            Worktree worktree = client.api().worktreeCreate(
+            Worktree worktree = api.worktreeCreate(
                     null,   // directory
                     null,   // workspace
                     input
@@ -134,7 +135,7 @@ public class VcsExample {
         WorktreeRemoveInput input = new WorktreeRemoveInput();
         input.setDirectory(directory);
 
-        Boolean result = client.api().worktreeRemove(
+        Boolean result = api.worktreeRemove(
                 null,   // directory
                 null,   // workspace
                 input
@@ -152,17 +153,16 @@ public class VcsExample {
         logger.info("====================");
 
         // Configure the client with Basic Auth
-        OpenCodeConfig config = new OpenCodeConfig();
-        config.setBaseUrl("http://localhost:4096");
-        config.setUsername("opencode");
-        config.setPassword("opencode123");
-
-        // Create the client
-        OpenCodeClient client = new OpenCodeClient(config);
+        ApiClient apiClient = new ApiClient();
+        apiClient.updateBaseUri("http://localhost:4096");
+        String credentials = "opencode:opencode123";
+        String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
+        apiClient.setRequestInterceptor(builder -> builder.header("Authorization", "Basic " + encoded));
+        DefaultApi api = new DefaultApi(apiClient);
 
         try {
             // Run the example
-            VcsExample example = new VcsExample(client);
+            VcsExample example = new VcsExample(api);
             example.demonstrateVcsOperations();
 
             logger.info("\n");

@@ -2,28 +2,30 @@ package opencode.examples.plainjava;
 
 import opencode.examples.plainjava.testing.ExampleContext;
 import opencode.examples.plainjava.testing.ResponseValidator;
-import opencode.sdk.client.OpenCodeClient;
-import opencode.sdk.config.OpenCodeConfig;
+import opencode.sdk.api.DefaultApi;
+import opencode.sdk.invoker.ApiClient;
 import opencode.sdk.invoker.ApiException;
 import opencode.sdk.model.Event;
 import opencode.sdk.model.GlobalEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Base64;
+
 public class EventStreamingExample {
 
     private static final Logger logger = LoggerFactory.getLogger(EventStreamingExample.class);
 
-    private final OpenCodeClient client;
+    private final DefaultApi api;
     private final ResponseValidator validator;
 
-    public EventStreamingExample(OpenCodeClient client) {
-        this.client = client;
+    public EventStreamingExample(DefaultApi api) {
+        this.api = api;
         this.validator = null;
     }
 
     public EventStreamingExample(ExampleContext context) {
-        this.client = context.getClient();
+        this.api = context.getDefaultApi();
         this.validator = context.getValidator();
     }
 
@@ -55,7 +57,7 @@ public class EventStreamingExample {
     private void demonstrateProjectEventSubscribe() throws ApiException {
         logger.info("\n--- Subscribing to Project Events (SSE) ---");
 
-        Event event = client.api().eventSubscribe(
+        Event event = api.eventSubscribe(
                 null,  // directory - uses current directory
                 null   // workspace - uses default workspace
         );
@@ -71,7 +73,7 @@ public class EventStreamingExample {
     private void demonstrateGlobalEvent() throws ApiException {
         logger.info("\n--- Subscribing to Global Events (SSE) ---");
 
-        GlobalEvent globalEvent = client.api().globalEvent();
+        GlobalEvent globalEvent = api.globalEvent();
 
         if (validator != null) {
             validator.validateNonNull(globalEvent, "global event");
@@ -101,17 +103,16 @@ public class EventStreamingExample {
         logger.info("=================================");
 
         // Configure the client with Basic Auth
-        OpenCodeConfig config = new OpenCodeConfig();
-        config.setBaseUrl("http://localhost:4096");
-        config.setUsername("opencode");
-        config.setPassword("opencode123");
-
-        // Create the client
-        OpenCodeClient client = new OpenCodeClient(config);
+        ApiClient apiClient = new ApiClient();
+        apiClient.updateBaseUri("http://localhost:4096");
+        String credentials = "opencode:opencode123";
+        String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
+        apiClient.setRequestInterceptor(builder -> builder.header("Authorization", "Basic " + encoded));
+        DefaultApi api = new DefaultApi(apiClient);
 
         try {
             // Run the example
-            EventStreamingExample example = new EventStreamingExample(client);
+            EventStreamingExample example = new EventStreamingExample(api);
             example.demonstrateEventStreaming();
 
             logger.info("\n");

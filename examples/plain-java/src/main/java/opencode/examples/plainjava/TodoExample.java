@@ -3,32 +3,30 @@ package opencode.examples.plainjava;
 import opencode.examples.plainjava.testing.ExampleContext;
 import opencode.examples.plainjava.testing.ResponseValidator;
 import opencode.sdk.api.DefaultApi;
-import opencode.sdk.client.OpenCodeClient;
+import opencode.sdk.invoker.ApiClient;
 import opencode.sdk.invoker.ApiException;
 import opencode.sdk.model.Session;
 import opencode.sdk.model.Todo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Base64;
 import java.util.List;
 
 public class TodoExample {
 
     private static final Logger logger = LoggerFactory.getLogger(TodoExample.class);
 
-    private final OpenCodeClient client;
     private final DefaultApi api;
     private final ResponseValidator validator;
 
-    public TodoExample(OpenCodeClient client) {
-        this.client = client;
-        this.api = client.api();
+    public TodoExample(DefaultApi api) {
+        this.api = api;
         this.validator = null;
     }
 
     public TodoExample(ExampleContext context) {
-        this.client = context.getClient();
-        this.api = client.api();
+        this.api = context.getDefaultApi();
         this.validator = context.getValidator();
     }
 
@@ -102,15 +100,15 @@ public class TodoExample {
     public static void main(String[] args) {
         try {
             // Configure the client
-            opencode.sdk.config.OpenCodeConfig config = new opencode.sdk.config.OpenCodeConfig();
-            config.setBaseUrl("http://localhost:4096");
-            config.setUsername("opencode");
-            config.setPassword("opencode123");
-
-            OpenCodeClient client = new OpenCodeClient(config);
+            ApiClient apiClient = new ApiClient();
+            apiClient.updateBaseUri("http://localhost:4096");
+            String credentials = "opencode:opencode123";
+            String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
+            apiClient.setRequestInterceptor(builder -> builder.header("Authorization", "Basic " + encoded));
+            DefaultApi api = new DefaultApi(apiClient);
 
             // Run the example
-            TodoExample example = new TodoExample(client);
+            TodoExample example = new TodoExample(api);
             example.demonstrateTodoOperations();
 
         } catch (Exception e) {
