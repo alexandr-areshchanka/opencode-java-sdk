@@ -50,8 +50,6 @@ flowchart TB
 | `Dockerfile` | Container definition |
 | `config/opencode.json.template` | Template for OpenCode server configuration |
 | `config/auth.json.template` | Template for authentication configuration |
-| `config/opencode.json` | Generated OpenCode config (from template at runtime) |
-| `config/auth.json` | Generated auth config (from template at runtime) |
 | `start.sh` | Startup script with environment variable handling and template processing |
 | `.env.opencode` | Environment variables for Docker Compose |
 | `.env.opencode.example` | Example environment file with all required variables |
@@ -118,12 +116,13 @@ docker/opencode/
 ├── Dockerfile
 ├── docker-compose.yml
 ├── start.sh
+├── .env
 ├── .env.opencode
 ├── .env.opencode.example
 ├── .dockerignore
 ├── config/
-│   ├── opencode.json
-│   └── auth.json
+│   ├── opencode.json.template
+│   └── auth.json.template
 └── README.md
 ```
 
@@ -132,7 +131,7 @@ docker/opencode/
 | Volume | Mount Point | Purpose |
 |--------|-------------|---------|
 | `opencode-data` | `/app/data` | Persistent data storage |
-| `opencode-config` | `/app/config` | Configuration files |
+| `opencode-config` | `/root/.config/opencode` | Configuration files |
 
 ## Networking
 

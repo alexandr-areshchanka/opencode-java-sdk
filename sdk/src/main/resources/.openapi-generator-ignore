@@ -4,3 +4,8 @@
 
 # Exclude docs (we don't need generated API/model documentation)
 docs/
+
+# Exclude generated test sources (we have generateModelTests=false and generateApiTests=false,
+# but the generator still creates empty test directories)
+src/test/
+
