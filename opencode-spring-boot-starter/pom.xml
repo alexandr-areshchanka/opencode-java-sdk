@@ -26,11 +26,17 @@
             <scope>compile</scope>
         </dependency>
 
-        <!-- Spring Boot Starter Web -->
+        <!-- Spring Boot Starter WebMvc (renamed from spring-boot-starter-web in Spring Boot 4.0) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
+            <artifactId>spring-boot-starter-webmvc</artifactId>
             <scope>compile</scope>
+        </dependency>
+
+        <!-- Jackson 2 compatibility module (Jackson 3 migration deferred) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-jackson2</artifactId>
         </dependency>
 
         <!-- Spring Boot Configuration Processor -->

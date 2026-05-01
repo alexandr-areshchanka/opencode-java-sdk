@@ -8,7 +8,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.12</version>
+        <version>4.0.6</version>
     </parent>
 
     <groupId>io.opencode</groupId>
@@ -34,11 +34,17 @@
             <scope>compile</scope>
         </dependency>
 
-        <!-- Spring Boot Starter Web -->
+        <!-- Spring Boot Starter WebMvc (renamed from spring-boot-starter-web in Spring Boot 4.0) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
+            <artifactId>spring-boot-starter-webmvc</artifactId>
             <scope>compile</scope>
+        </dependency>
+
+        <!-- Jackson 2 compatibility module (Jackson 3 migration deferred) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-jackson2</artifactId>
         </dependency>
 
         <!-- Spring Boot Starter Validation -->
@@ -55,10 +61,22 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- Spring Boot Starter Test -->
+        <!-- Spring Boot Starter Test Classic (intermediate migration step from spring-boot-starter-test) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
+            <artifactId>spring-boot-starter-test-classic</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- TestRestTemplate support (required in Spring Boot 4.0) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-resttestclient</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-restclient</artifactId>
             <scope>test</scope>
         </dependency>
 
