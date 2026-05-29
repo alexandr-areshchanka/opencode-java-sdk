@@ -1,6 +1,5 @@
 package opencode.sdk.springboot.autoconfigure;
 
-import opencode.sdk.api.DefaultApi;
 import opencode.sdk.invoker.ApiClient;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -34,14 +33,8 @@ public class OpenCodeAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public DefaultApi defaultApi(ApiClient apiClient) {
-        return new DefaultApi(apiClient);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public opencode.sdk.springboot.OpenCodeService openCodeService(DefaultApi defaultApi, ApiClient apiClient) {
-        return new opencode.sdk.springboot.OpenCodeService(defaultApi, apiClient);
+    public opencode.sdk.springboot.OpenCodeService openCodeService(ApiClient apiClient) {
+        return new opencode.sdk.springboot.OpenCodeService(apiClient);
     }
 
     private String createBasicAuthHeader(String username, String password) {

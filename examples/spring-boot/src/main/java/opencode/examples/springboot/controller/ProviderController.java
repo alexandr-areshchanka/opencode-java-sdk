@@ -22,12 +22,12 @@ public class ProviderController {
 
     @GetMapping
     public ProviderList200Response listProviders() throws ApiException {
-        return openCodeService.api().providerList(null, null);
+        return openCodeService.providerApi().providerList(null, null);
     }
 
     @GetMapping("/{provider}")
     public Map<String, Object> getProvider(@PathVariable String provider) throws ApiException {
-        ProviderList200Response response = openCodeService.api().providerList(null, null);
+        ProviderList200Response response = openCodeService.providerApi().providerList(null, null);
         return response.getAll().stream()
                 .filter(p -> provider.equals(p.getId()))
                 .findFirst()
@@ -39,7 +39,7 @@ public class ProviderController {
     public ProviderAuthAuthorization oauthAuthorize(
             @PathVariable String provider,
             @RequestBody(required = false) ProviderOauthAuthorizeRequest request) throws ApiException {
-        return openCodeService.api().providerOauthAuthorize(provider, null, null, request);
+        return openCodeService.providerApi().providerOauthAuthorize(provider, null, null, request);
     }
 
     @GetMapping("/{provider}/oauth/callback")
@@ -47,7 +47,7 @@ public class ProviderController {
             @PathVariable String provider,
             ProviderOauthCallbackRequest request) {
         try {
-            Boolean result = openCodeService.api().providerOauthCallback(provider, null, null, request);
+            Boolean result = openCodeService.providerApi().providerOauthCallback(provider, null, null, request);
             return ResponseEntity.ok(result);
         } catch (ApiException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)

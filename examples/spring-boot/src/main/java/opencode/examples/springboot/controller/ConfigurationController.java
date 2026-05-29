@@ -18,18 +18,18 @@ public class ConfigurationController {
 
     @GetMapping("/project")
     public Config getProjectConfig() throws ApiException {
-        return openCodeService.api().configGet(null, null);
+        return openCodeService.configApi().configGet(null, null);
     }
 
     @GetMapping("/global")
     public Config getGlobalConfig() throws ApiException {
-        return openCodeService.api().globalConfigGet();
+        return openCodeService.globalApi().globalConfigGet();
     }
 
     @PatchMapping("/project")
     public ResponseEntity<?> updateConfig(@Valid @RequestBody Config config) throws ApiException {
         try {
-            Config result = openCodeService.api().configUpdate(null, null, config);
+            Config result = openCodeService.configApi().configUpdate(null, null, config);
             return ResponseEntity.ok(result);
         } catch (ApiException e) {
             if (e.getCode() == 400) {
@@ -42,6 +42,6 @@ public class ConfigurationController {
 
     @GetMapping("/providers")
     public ConfigProviders200Response getProviders() throws ApiException {
-        return openCodeService.api().configProviders(null, null);
+        return openCodeService.configApi().configProviders(null, null);
     }
 }

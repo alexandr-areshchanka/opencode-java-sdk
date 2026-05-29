@@ -27,7 +27,7 @@ public class SessionAdvancedController {
         if (!isValidSessionId(sessionId)) {
             return ResponseEntity.notFound().build();
         }
-        Session session = openCodeService.api().sessionFork(sessionId, null, null, request);
+        Session session = openCodeService.sessionApi().sessionFork(sessionId, null, null, request);
         return ResponseEntity.ok(session);
     }
 
@@ -38,7 +38,7 @@ public class SessionAdvancedController {
         if (!isValidSessionId(sessionId)) {
             return ResponseEntity.notFound().build();
         }
-        Session session = openCodeService.api().sessionRevert(sessionId, null, null, request);
+        Session session = openCodeService.sessionApi().sessionRevert(sessionId, null, null, request);
         return ResponseEntity.ok(session);
     }
 
@@ -47,7 +47,7 @@ public class SessionAdvancedController {
         if (!isValidSessionId(sessionId)) {
             return ResponseEntity.notFound().build();
         }
-        Session session = openCodeService.api().sessionShare(sessionId, null, null);
+        Session session = openCodeService.sessionApi().sessionShare(sessionId, null, null);
         return ResponseEntity.ok(session);
     }
 
@@ -58,7 +58,7 @@ public class SessionAdvancedController {
         if (!isValidSessionId(sessionId)) {
             return ResponseEntity.notFound().build();
         }
-        Boolean result = openCodeService.api().sessionSummarize(sessionId, null, null, request);
+        Boolean result = openCodeService.sessionApi().sessionSummarize(sessionId, null, null, request);
         return ResponseEntity.ok(result);
     }
 
@@ -78,7 +78,7 @@ public class SessionAdvancedController {
         if (!isValidSessionId(sessionId)) {
             return ResponseEntity.notFound().build();
         }
-        SessionPrompt200Response response = openCodeService.api().sessionCommand(sessionId, null, null, request);
+        SessionPrompt200Response response = openCodeService.sessionApi().sessionCommand(sessionId, null, null, request);
         return ResponseEntity.ok(response);
     }
 
@@ -89,7 +89,7 @@ public class SessionAdvancedController {
         if (!isValidSessionId(sessionId)) {
             return ResponseEntity.notFound().build();
         }
-        AssistantMessage message = openCodeService.api().sessionShell(sessionId, null, null, request);
+        SessionShell200Response message = openCodeService.sessionApi().sessionShell(sessionId, null, null, request);
         return ResponseEntity.ok(message);
     }
 }

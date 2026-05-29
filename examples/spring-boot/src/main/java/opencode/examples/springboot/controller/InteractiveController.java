@@ -20,7 +20,7 @@ public class InteractiveController {
 
     @GetMapping("/questions")
     public List<QuestionRequest> listQuestions() throws ApiException {
-        return openCodeService.api().questionList(null, null);
+        return openCodeService.questionApi().questionList(null, null);
     }
 
     @PostMapping("/questions/reply")
@@ -31,12 +31,12 @@ public class InteractiveController {
             return ResponseEntity.badRequest()
                     .body(Map.of("error", "Invalid request ID", "message", "Request ID cannot be null or empty"));
         }
-        return ResponseEntity.ok(openCodeService.api().questionReply(requestId, null, null, request));
+        return ResponseEntity.ok(openCodeService.questionApi().questionReply(requestId, null, null, request));
     }
 
     @GetMapping("/permissions")
     public List<PermissionRequest> listPermissions() throws ApiException {
-        return openCodeService.api().permissionList(null, null);
+        return openCodeService.permissionApi().permissionList(null, null);
     }
 
     @PostMapping("/permissions/reply")
@@ -47,7 +47,7 @@ public class InteractiveController {
             return ResponseEntity.badRequest()
                     .body(Map.of("error", "Invalid request ID", "message", "Request ID cannot be null or empty"));
         }
-        return ResponseEntity.ok(openCodeService.api().permissionReply(requestId, null, null, request));
+        return ResponseEntity.ok(openCodeService.permissionApi().permissionReply(requestId, null, null, request));
     }
 
     @PostMapping("/permissions/respond")
@@ -63,6 +63,6 @@ public class InteractiveController {
             return ResponseEntity.badRequest()
                     .body(Map.of("error", "Invalid permission ID", "message", "Permission ID cannot be null or empty"));
         }
-        return ResponseEntity.ok(openCodeService.api().permissionRespond(sessionId, permissionId, null, null, request));
+        return ResponseEntity.ok(openCodeService.sessionApi().permissionRespond(sessionId, permissionId, null, null, request));
     }
 }

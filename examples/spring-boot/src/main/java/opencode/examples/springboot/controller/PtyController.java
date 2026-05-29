@@ -19,26 +19,26 @@ public class PtyController {
 
     @GetMapping
     public List<Pty> listPtys() throws ApiException {
-        return openCodeService.api().ptyList(null, null);
+        return openCodeService.ptyApi().ptyList(null, null);
     }
 
     @PostMapping
     public Pty createPty(@RequestBody PtyCreateRequest request) throws ApiException {
-        return openCodeService.api().ptyCreate(null, null, request);
+        return openCodeService.ptyApi().ptyCreate(null, null, request);
     }
 
     @GetMapping("/{id}")
     public Pty getPty(@PathVariable String id) throws ApiException {
-        return openCodeService.api().ptyGet(id, null, null);
+        return openCodeService.ptyApi().ptyGet(id, null, null);
     }
 
     @PatchMapping("/{id}")
     public Pty updatePty(@PathVariable String id, @RequestBody PtyUpdateRequest request) throws ApiException {
-        return openCodeService.api().ptyUpdate(id, null, null, request);
+        return openCodeService.ptyApi().ptyUpdate(id, null, null, request);
     }
 
     @DeleteMapping("/{id}")
     public Boolean deletePty(@PathVariable String id) throws ApiException {
-        return openCodeService.api().ptyRemove(id, null, null);
+        return openCodeService.ptyApi().ptyRemove(id, null, null);
     }
 }

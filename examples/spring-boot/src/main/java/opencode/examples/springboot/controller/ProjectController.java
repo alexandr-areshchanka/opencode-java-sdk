@@ -17,17 +17,17 @@ public class ProjectController {
 
     @GetMapping
     public List<Project> listProjects() throws Exception {
-        return openCodeService.api().projectList(null, null);
+        return openCodeService.projectApi().projectList(null, null);
     }
 
     @GetMapping("/current")
     public Project getCurrentProject() throws Exception {
-        return openCodeService.api().projectCurrent(null, null);
+        return openCodeService.projectApi().projectCurrent(null, null);
     }
 
     @PatchMapping("/current")
     public Project updateCurrentProject(@RequestBody ProjectUpdateRequest request) throws Exception {
-        Project currentProject = openCodeService.api().projectCurrent(null, null);
-        return openCodeService.api().projectUpdate(currentProject.getId(), null, null, request);
+        Project currentProject = openCodeService.projectApi().projectCurrent(null, null);
+        return openCodeService.projectApi().projectUpdate(currentProject.getId(), null, null, request);
     }
 }

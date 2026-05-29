@@ -17,34 +17,34 @@ public class McpController {
 
     @GetMapping
     public Map<String, MCPStatus> listMcpServers() throws ApiException {
-        return openCodeService.api().mcpStatus(null, null);
+        return openCodeService.mcpApi().mcpStatus(null, null);
     }
 
     @PostMapping
     public Map<String, MCPStatus> addMcpServer(@RequestBody McpAddRequest request) throws ApiException {
-        return openCodeService.api().mcpAdd(null, null, request);
+        return openCodeService.mcpApi().mcpAdd(null, null, request);
     }
 
     @GetMapping("/{name}/status")
     public MCPStatus getMcpServerStatus(@PathVariable String name) throws ApiException {
-        Map<String, MCPStatus> statusMap = openCodeService.api().mcpStatus(null, null);
+        Map<String, MCPStatus> statusMap = openCodeService.mcpApi().mcpStatus(null, null);
         return statusMap.get(name);
     }
 
     @PostMapping("/{name}/auth/start")
     public McpAuthStart200Response startMcpAuth(@PathVariable String name) throws ApiException {
-        return openCodeService.api().mcpAuthStart(name, null, null);
+        return openCodeService.mcpApi().mcpAuthStart(name, null, null);
     }
 
     @PostMapping("/{name}/auth/callback")
     public MCPStatus mcpAuthCallback(
             @PathVariable String name,
             @RequestBody McpAuthCallbackRequest request) throws ApiException {
-        return openCodeService.api().mcpAuthCallback(name, null, null, request);
+        return openCodeService.mcpApi().mcpAuthCallback(name, null, null, request);
     }
 
     @DeleteMapping("/{name}/auth")
     public McpAuthRemove200Response removeMcpAuth(@PathVariable String name) throws ApiException {
-        return openCodeService.api().mcpAuthRemove(name, null, null);
+        return openCodeService.mcpApi().mcpAuthRemove(name, null, null);
     }
 }

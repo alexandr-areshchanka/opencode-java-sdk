@@ -19,11 +19,11 @@ public class EventStreamingController {
 
     @GetMapping(value = "/", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Event subscribeToEvents() throws ApiException {
-        return openCodeService.api().eventSubscribe(null, null);
+        return openCodeService.eventApi().eventSubscribe(null, null);
     }
 
     @GetMapping(value = "/global", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public GlobalEvent subscribeToGlobalEvents() throws ApiException {
-        return openCodeService.api().globalEvent();
+        return openCodeService.globalApi().globalEvent();
     }
 }

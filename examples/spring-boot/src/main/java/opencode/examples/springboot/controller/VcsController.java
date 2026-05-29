@@ -17,6 +17,6 @@ public class VcsController {
 
     @GetMapping
     public VcsInfo getVcsInfo() throws ApiException {
-        return openCodeService.api().vcsGet(null, null);
+        return openCodeService.instanceApi().vcsGet(null, null);
     }
 }

@@ -25,12 +25,12 @@ public class SessionCrudController {
 
     @GetMapping
     public List<Session> listSessions() throws ApiException {
-        return openCodeService.api().sessionList(null, null, null, null, null, null);
+        return openCodeService.sessionApi().sessionList(null, null, null, null, null, null, null, null);
     }
 
     @PostMapping
     public Session createSession(@RequestBody SessionCreateRequest request) throws ApiException {
-        return openCodeService.api().sessionCreate(null, null, request);
+        return openCodeService.sessionApi().sessionCreate(null, null, request);
     }
 
     @GetMapping("/{sessionId}")
@@ -49,7 +49,7 @@ public class SessionCrudController {
         if (!isValidSessionId(sessionId)) {
             return ResponseEntity.notFound().build();
         }
-        openCodeService.api().sessionUpdate(sessionId, null, null, request);
+        openCodeService.sessionApi().sessionUpdate(sessionId, null, null, request);
         return ResponseEntity.noContent().build();
     }
 
@@ -58,7 +58,7 @@ public class SessionCrudController {
         if (!isValidSessionId(sessionId)) {
             return ResponseEntity.notFound().build();
         }
-        openCodeService.api().sessionDelete(sessionId, null, null);
+        openCodeService.sessionApi().sessionDelete(sessionId, null, null);
         return ResponseEntity.noContent().build();
     }
 
@@ -69,7 +69,7 @@ public class SessionCrudController {
         if (!isValidSessionId(sessionId)) {
             return ResponseEntity.notFound().build();
         }
-        openCodeService.api().sessionInit(sessionId, null, null, request);
+        openCodeService.sessionApi().sessionInit(sessionId, null, null, request);
         return ResponseEntity.noContent().build();
     }
 }

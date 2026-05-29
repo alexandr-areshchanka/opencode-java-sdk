@@ -16,7 +16,7 @@ public class InstanceController {
 
     @GetMapping
     public GlobalHealth200Response listInstances() throws ApiException {
-        return openCodeService.api().globalHealth();
+        return openCodeService.globalApi().globalHealth();
     }
 
     @PostMapping
@@ -26,6 +26,6 @@ public class InstanceController {
 
     @DeleteMapping("/{instanceId}")
     public Boolean disposeInstance(@PathVariable String instanceId) throws ApiException {
-        return openCodeService.api().instanceDispose(null, null);
+        return openCodeService.instanceApi().instanceDispose(null, null);
     }
 }

@@ -20,6 +20,6 @@ public class TodoController {
 
     @GetMapping("/{sessionId}")
     public List<Todo> getSessionTodos(@PathVariable String sessionId) throws ApiException {
-        return openCodeService.api().sessionTodo(sessionId, null, null);
+        return openCodeService.sessionApi().sessionTodo(sessionId, null, null);
     }
 }

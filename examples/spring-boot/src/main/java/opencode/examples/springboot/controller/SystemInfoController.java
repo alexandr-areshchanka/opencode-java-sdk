@@ -20,11 +20,11 @@ public class SystemInfoController {
 
     @GetMapping("/health")
     public GlobalHealth200Response getHealth() throws ApiException {
-        return openCodeService.api().globalHealth();
+        return openCodeService.globalApi().globalHealth();
     }
 
     @GetMapping("/skills")
     public List<AppSkills200ResponseInner> getSkills() throws ApiException {
-        return openCodeService.api().appSkills(null, null);
+        return openCodeService.instanceApi().appSkills(null, null);
     }
 }

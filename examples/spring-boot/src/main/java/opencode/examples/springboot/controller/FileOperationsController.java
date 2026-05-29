@@ -23,7 +23,7 @@ public class FileOperationsController {
             @RequestParam String path,
             @RequestParam(required = false) String directory,
             @RequestParam(required = false) String workspace) throws ApiException {
-        return openCodeService.api().fileList(path, directory, workspace);
+        return openCodeService.fileApi().fileList(path, directory, workspace);
     }
 
     @GetMapping("/content")
@@ -31,7 +31,7 @@ public class FileOperationsController {
             @RequestParam String path,
             @RequestParam(required = false) String directory,
             @RequestParam(required = false) String workspace) throws ApiException {
-        return openCodeService.api().fileRead(path, directory, workspace);
+        return openCodeService.fileApi().fileRead(path, directory, workspace);
     }
 
     @GetMapping("/search")
@@ -39,7 +39,7 @@ public class FileOperationsController {
             @RequestParam String pattern,
             @RequestParam(required = false) String directory,
             @RequestParam(required = false) String workspace) throws ApiException {
-        return openCodeService.api().findText(pattern, directory, workspace);
+        return openCodeService.fileApi().findText(pattern, directory, workspace);
     }
 
     @GetMapping("/find")
@@ -50,7 +50,7 @@ public class FileOperationsController {
             @RequestParam(required = false) String dirs,
             @RequestParam(required = false) String type,
             @RequestParam(required = false) Integer limit) throws ApiException {
-        return openCodeService.api().findFiles(query, directory, workspace, dirs, type, limit);
+        return openCodeService.fileApi().findFiles(query, directory, workspace, dirs, type, limit);
     }
 
     @GetMapping("/symbols")
@@ -58,22 +58,22 @@ public class FileOperationsController {
             @RequestParam String query,
             @RequestParam(required = false) String directory,
             @RequestParam(required = false) String workspace) throws ApiException {
-        return openCodeService.api().findSymbols(query, directory, workspace);
+        return openCodeService.fileApi().findSymbols(query, directory, workspace);
     }
 
     @GetMapping("/diff")
-    public List<FileDiff> getFileDiff(
+    public List<SnapshotFileDiff> getFileDiff(
             @RequestParam String sessionId,
             @RequestParam(required = false) String directory,
             @RequestParam(required = false) String workspace,
             @RequestParam(required = false) String messageId) throws ApiException {
-        return openCodeService.api().sessionDiff(sessionId, directory, workspace, messageId);
+        return openCodeService.sessionApi().sessionDiff(sessionId, directory, workspace, messageId);
     }
 
     @GetMapping("/status")
     public List<opencode.sdk.model.ModelFile> getFileStatus(
             @RequestParam(required = false) String directory,
             @RequestParam(required = false) String workspace) throws ApiException {
-        return openCodeService.api().fileStatus(directory, workspace);
+        return openCodeService.fileApi().fileStatus(directory, workspace);
     }
 }

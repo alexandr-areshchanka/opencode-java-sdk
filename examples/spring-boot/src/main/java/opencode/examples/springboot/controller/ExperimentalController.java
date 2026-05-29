@@ -17,21 +17,21 @@ public class ExperimentalController {
 
     @PostMapping("/workspace")
     public Workspace createWorkspace(@RequestBody ExperimentalWorkspaceCreateRequest request) throws ApiException {
-        return openCodeService.api().experimentalWorkspaceCreate(null, null, request);
+        return openCodeService.workspaceApi().experimentalWorkspaceCreate(null, null, request);
     }
 
     @GetMapping("/worktree")
     public List<String> listWorktrees() throws ApiException {
-        return openCodeService.api().worktreeList(null, null);
+        return openCodeService.experimentalApi().worktreeList(null, null);
     }
 
     @PostMapping("/worktree")
     public Worktree createWorktree(@RequestBody WorktreeCreateInput input) throws ApiException {
-        return openCodeService.api().worktreeCreate(null, null, input);
+        return openCodeService.experimentalApi().worktreeCreate(null, null, input);
     }
 
     @DeleteMapping("/worktree")
     public Boolean removeWorktree(@RequestBody WorktreeRemoveInput input) throws ApiException {
-        return openCodeService.api().worktreeRemove(null, null, input);
+        return openCodeService.experimentalApi().worktreeRemove(null, null, input);
     }
 }

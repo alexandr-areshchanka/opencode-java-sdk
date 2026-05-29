@@ -22,19 +22,19 @@ public class MessageController {
 
     @GetMapping("/{sessionId}")
     public List<SessionMessages200ResponseInner> getSessionMessages(@PathVariable String sessionId) throws ApiException {
-        return openCodeService.api().sessionMessages(sessionId, null, null, null);
+        return openCodeService.sessionApi().sessionMessages(sessionId, null, null, null, null);
     }
 
     @PostMapping("/{sessionId}/prompt")
     public SessionPrompt200Response sendPrompt(
             @PathVariable String sessionId,
             @RequestBody SessionPromptRequest request) throws ApiException {
-        return openCodeService.api().sessionPrompt(sessionId, null, null, request);
+        return openCodeService.sessionApi().sessionPrompt(sessionId, null, null, request);
     }
 
     @PostMapping("/{sessionId}/abort")
     public ResponseEntity<Void> abortMessage(@PathVariable String sessionId) throws ApiException {
-        openCodeService.api().sessionAbort(sessionId, null, null);
+        openCodeService.sessionApi().sessionAbort(sessionId, null, null);
         return ResponseEntity.noContent().build();
     }
 }
