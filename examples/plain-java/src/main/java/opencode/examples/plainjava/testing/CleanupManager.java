@@ -1,6 +1,6 @@
 package opencode.examples.plainjava.testing;
 
-import opencode.sdk.api.DefaultApi;
+import opencode.sdk.api.SessionApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,11 +11,11 @@ public class CleanupManager {
 
     private static final Logger logger = LoggerFactory.getLogger(CleanupManager.class);
 
-    private final DefaultApi api;
+    private final SessionApi sessionApi;
     private final TestLogger testLogger;
 
-    public CleanupManager(DefaultApi api, TestLogger testLogger) {
-        this.api = api;
+    public CleanupManager(SessionApi sessionApi, TestLogger testLogger) {
+        this.sessionApi = sessionApi;
         this.testLogger = testLogger;
     }
 
@@ -60,7 +60,7 @@ public class CleanupManager {
 
     private void cleanupSession(String sessionId) {
         try {
-            api.sessionDelete(sessionId, null, null);
+            sessionApi.sessionDelete(sessionId, null, null);
             logger.debug("Deleted session: {}", sessionId);
         } catch (Exception e) {
             throw new RuntimeException("Failed to delete session: " + e.getMessage(), e);

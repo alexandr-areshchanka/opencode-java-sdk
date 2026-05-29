@@ -3,7 +3,6 @@ package opencode.examples.plainjava;
 import opencode.examples.plainjava.testing.ExampleContext;
 import opencode.examples.plainjava.testing.ResourceTracker;
 import opencode.examples.plainjava.testing.ResponseValidator;
-import opencode.sdk.api.DefaultApi;
 import opencode.sdk.api.SessionApi;
 import opencode.sdk.invoker.ApiClient;
 import opencode.sdk.invoker.ApiException;
@@ -18,24 +17,18 @@ public class SessionAdvancedExample {
 
     private static final Logger logger = LoggerFactory.getLogger(SessionAdvancedExample.class);
 
-    private final DefaultApi api;
-    private final ApiClient apiClient;
     private final SessionApi sessionApi;
     private final ResponseValidator validator;
     private final ResourceTracker tracker;
 
-    public SessionAdvancedExample(DefaultApi api, ApiClient apiClient) {
-        this.api = api;
-        this.apiClient = apiClient;
+    public SessionAdvancedExample(ApiClient apiClient) {
         this.sessionApi = new SessionApi(apiClient);
         this.validator = null;
         this.tracker = null;
     }
 
     public SessionAdvancedExample(ExampleContext context) {
-        this.api = context.getDefaultApi();
-        this.apiClient = context.getApiClient();
-        this.sessionApi = new SessionApi(apiClient);
+        this.sessionApi = new SessionApi(context.getApiClient());
         this.validator = context.getValidator();
         this.tracker = context.getResourceTracker();
     }
@@ -90,7 +83,7 @@ public class SessionAdvancedExample {
         SessionCreateRequest request = new SessionCreateRequest();
         request.setTitle(title);
 
-        Session session = api.sessionCreate(
+        Session session = sessionApi.sessionCreate(
                 null,
                 null,
                 request
@@ -115,7 +108,7 @@ public class SessionAdvancedExample {
         SessionForkRequest request = new SessionForkRequest();
         request.setMessageID(null);
 
-        Session forkedSession = api.sessionFork(
+        Session forkedSession = sessionApi.sessionFork(
                 sessionId,
                 null,
                 null,
@@ -174,7 +167,7 @@ public class SessionAdvancedExample {
     private void shareSession(String sessionId) throws ApiException {
         logger.info("\n--- Sharing Session: {} ---", sessionId);
 
-        Session session = api.sessionShare(
+        Session session = sessionApi.sessionShare(
                 sessionId,
                 null,
                 null
@@ -190,7 +183,7 @@ public class SessionAdvancedExample {
     private void unshareSession(String sessionId) throws ApiException {
         logger.info("\n--- Unsharing Session: {} ---", sessionId);
 
-        Session session = api.sessionUnshare(
+        Session session = sessionApi.sessionUnshare(
                 sessionId,
                 null,
                 null
@@ -207,7 +200,7 @@ public class SessionAdvancedExample {
         request.setModelID("glm-4.7");
         request.setAuto(true);
 
-        Boolean result = api.sessionSummarize(
+        Boolean result = sessionApi.sessionSummarize(
                 sessionId,
                 null,
                 null,
@@ -224,7 +217,7 @@ public class SessionAdvancedExample {
     private void abortSession(String sessionId) throws ApiException {
         logger.info("\n--- Aborting Session Processing: {} ---", sessionId);
 
-        Boolean result = api.sessionAbort(
+        Boolean result = sessionApi.sessionAbort(
                 sessionId,
                 null,
                 null
@@ -244,7 +237,7 @@ public class SessionAdvancedExample {
         request.setMessageID("message-id-to-revert-to");
         request.setPartID(null);
 
-        Session session = api.sessionRevert(
+        Session session = sessionApi.sessionRevert(
                 sessionId,
                 null,
                 null,
@@ -257,7 +250,7 @@ public class SessionAdvancedExample {
     private void unrevertSession(String sessionId) throws ApiException {
         logger.info("\n--- Unreverting Session: {} ---", sessionId);
 
-        Session session = api.sessionUnrevert(
+        Session session = sessionApi.sessionUnrevert(
                 sessionId,
                 null,
                 null
@@ -274,9 +267,8 @@ public class SessionAdvancedExample {
             String credentials = "opencode:opencode123";
             String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
             apiClient.setRequestInterceptor(builder -> builder.header("Authorization", "Basic " + encoded));
-            DefaultApi api = new DefaultApi(apiClient);
 
-            SessionAdvancedExample example = new SessionAdvancedExample(api, apiClient);
+            SessionAdvancedExample example = new SessionAdvancedExample(apiClient);
             example.demonstrateAdvancedSessionOperations();
 
         } catch (Exception e) {

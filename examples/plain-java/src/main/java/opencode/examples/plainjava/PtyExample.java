@@ -3,7 +3,7 @@ package opencode.examples.plainjava;
 import opencode.examples.plainjava.testing.ExampleContext;
 import opencode.examples.plainjava.testing.ResourceTracker;
 import opencode.examples.plainjava.testing.ResponseValidator;
-import opencode.sdk.api.DefaultApi;
+import opencode.sdk.api.PtyApi;
 import opencode.sdk.invoker.ApiClient;
 import opencode.sdk.invoker.ApiException;
 import opencode.sdk.model.Pty;
@@ -13,7 +13,6 @@ import opencode.sdk.model.PtyUpdateRequestSize;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.math.BigDecimal;
 import java.util.Base64;
 import java.util.List;
 
@@ -21,18 +20,18 @@ public class PtyExample {
 
     private static final Logger logger = LoggerFactory.getLogger(PtyExample.class);
 
-    private final DefaultApi api;
+    private final PtyApi ptyApi;
     private final ResponseValidator validator;
     private final ResourceTracker tracker;
 
-    public PtyExample(DefaultApi api) {
-        this.api = api;
+    public PtyExample(ApiClient apiClient) {
+        this.ptyApi = new PtyApi(apiClient);
         this.validator = null;
         this.tracker = null;
     }
 
     public PtyExample(ExampleContext context) {
-        this.api = context.getDefaultApi();
+        this.ptyApi = new PtyApi(context.getApiClient());
         this.validator = context.getValidator();
         this.tracker = context.getResourceTracker();
     }
@@ -77,7 +76,7 @@ public class PtyExample {
     private void listPtySessions() throws ApiException {
         logger.info("\n--- Listing PTY Sessions ---");
 
-        List<Pty> ptys = api.ptyList(
+        List<Pty> ptys = ptyApi.ptyList(
                 null,  // directory
                 null   // workspace
         );
@@ -108,7 +107,7 @@ public class PtyExample {
         request.setTitle("Example PTY Session");
         request.setCwd(System.getProperty("user.dir"));
 
-        Pty pty = api.ptyCreate(
+        Pty pty = ptyApi.ptyCreate(
                 null,     // directory
                 null,     // workspace
                 request
@@ -138,7 +137,7 @@ public class PtyExample {
     private void getPty(String ptyId) throws ApiException {
         logger.info("\n--- Getting PTY Details: {} ---", ptyId);
 
-        Pty pty = api.ptyGet(
+        Pty pty = ptyApi.ptyGet(
                 ptyId,
                 null,  // directory
                 null   // workspace
@@ -154,13 +153,13 @@ public class PtyExample {
         logger.info("\n--- Resizing PTY: {} to {}x{} ---", ptyId, rows, cols);
 
         PtyUpdateRequestSize size = new PtyUpdateRequestSize();
-        size.setRows(BigDecimal.valueOf(rows));
-        size.setCols(BigDecimal.valueOf(cols));
+        size.setRows(rows);
+        size.setCols(cols);
 
         PtyUpdateRequest request = new PtyUpdateRequest();
         request.setSize(size);
 
-        Pty pty = api.ptyUpdate(
+        Pty pty = ptyApi.ptyUpdate(
                 ptyId,
                 null,     // directory
                 null,     // workspace
@@ -178,7 +177,7 @@ public class PtyExample {
         PtyUpdateRequest request = new PtyUpdateRequest();
         request.setTitle(title);
 
-        Pty pty = api.ptyUpdate(
+        Pty pty = ptyApi.ptyUpdate(
                 ptyId,
                 null,     // directory
                 null,     // workspace
@@ -193,7 +192,7 @@ public class PtyExample {
     private void removePty(String ptyId) throws ApiException {
         logger.info("\n--- Removing PTY Session: {} ---", ptyId);
 
-        Boolean result = api.ptyRemove(
+        Boolean result = ptyApi.ptyRemove(
                 ptyId,
                 null,  // directory
                 null   // workspace
@@ -216,11 +215,10 @@ public class PtyExample {
         String credentials = "opencode:opencode123";
         String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
         apiClient.setRequestInterceptor(builder -> builder.header("Authorization", "Basic " + encoded));
-        DefaultApi api = new DefaultApi(apiClient);
 
         try {
             // Run the example
-            PtyExample example = new PtyExample(api);
+            PtyExample example = new PtyExample(apiClient);
             example.demonstratePtyOperations();
 
             logger.info("\n");

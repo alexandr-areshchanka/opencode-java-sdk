@@ -2,7 +2,7 @@ package opencode.examples.plainjava;
 
 import opencode.examples.plainjava.testing.ExampleContext;
 import opencode.examples.plainjava.testing.ResponseValidator;
-import opencode.sdk.api.DefaultApi;
+import opencode.sdk.api.ProjectApi;
 import opencode.sdk.invoker.ApiClient;
 import opencode.sdk.invoker.ApiException;
 import opencode.sdk.model.Project;
@@ -17,16 +17,16 @@ public class ProjectExample {
 
     private static final Logger logger = LoggerFactory.getLogger(ProjectExample.class);
 
-    private final DefaultApi api;
+    private final ProjectApi projectApi;
     private final ResponseValidator validator;
 
-    public ProjectExample(DefaultApi api) {
-        this.api = api;
+    public ProjectExample(ApiClient apiClient) {
+        this.projectApi = new ProjectApi(apiClient);
         this.validator = null;
     }
 
     public ProjectExample(ExampleContext context) {
-        this.api = context.getDefaultApi();
+        this.projectApi = new ProjectApi(context.getApiClient());
         this.validator = context.getValidator();
     }
 
@@ -57,7 +57,7 @@ public class ProjectExample {
     private void listProjects() throws ApiException {
         logger.info("\n--- Listing All Projects ---");
 
-        List<Project> projects = api.projectList(
+        List<Project> projects = projectApi.projectList(
                 null,  // directory
                 null   // workspace
         );
@@ -93,7 +93,7 @@ public class ProjectExample {
     private Project getCurrentProject() throws ApiException {
         logger.info("\n--- Retrieving Current Project ---");
 
-        Project project = api.projectCurrent(
+        Project project = projectApi.projectCurrent(
                 null,  // directory
                 null   // workspace
         );
@@ -129,10 +129,10 @@ public class ProjectExample {
         ProjectUpdateRequest updateRequest = new ProjectUpdateRequest();
         updateRequest.setName("Updated Project Name");
 
-        Project updatedProject = api.projectUpdate(
-                projectId,      // projectID (required)
+        Project updatedProject = projectApi.projectUpdate(
                 null,           // directory
                 null,           // workspace
+                projectId,      // projectID (required)
                 updateRequest   // update request
         );
 
@@ -158,11 +158,10 @@ public class ProjectExample {
         String credentials = "opencode:opencode123";
         String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
         apiClient.setRequestInterceptor(builder -> builder.header("Authorization", "Basic " + encoded));
-        DefaultApi api = new DefaultApi(apiClient);
 
         try {
             // Run the example
-            ProjectExample example = new ProjectExample(api);
+            ProjectExample example = new ProjectExample(apiClient);
             example.demonstrateProjectOperations();
 
             logger.info("\n");

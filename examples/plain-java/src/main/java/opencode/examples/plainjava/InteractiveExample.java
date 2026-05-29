@@ -2,7 +2,9 @@ package opencode.examples.plainjava;
 
 import opencode.examples.plainjava.testing.ExampleContext;
 import opencode.examples.plainjava.testing.ResponseValidator;
-import opencode.sdk.api.DefaultApi;
+import opencode.sdk.api.ExperimentalApi;
+import opencode.sdk.api.PermissionApi;
+import opencode.sdk.api.QuestionApi;
 import opencode.sdk.invoker.ApiClient;
 import opencode.sdk.invoker.ApiException;
 import opencode.sdk.model.*;
@@ -17,16 +19,22 @@ public class InteractiveExample {
 
     private static final Logger logger = LoggerFactory.getLogger(InteractiveExample.class);
 
-    private final DefaultApi api;
+    private final ExperimentalApi experimentalApi;
+    private final QuestionApi questionApi;
+    private final PermissionApi permissionApi;
     private final ResponseValidator validator;
 
-    public InteractiveExample(DefaultApi api) {
-        this.api = api;
+    public InteractiveExample(ApiClient apiClient) {
+        this.experimentalApi = new ExperimentalApi(apiClient);
+        this.questionApi = new QuestionApi(apiClient);
+        this.permissionApi = new PermissionApi(apiClient);
         this.validator = null;
     }
 
     public InteractiveExample(ExampleContext context) {
-        this.api = context.getDefaultApi();
+        this.experimentalApi = new ExperimentalApi(context.getApiClient());
+        this.questionApi = new QuestionApi(context.getApiClient());
+        this.permissionApi = new PermissionApi(context.getApiClient());
         this.validator = context.getValidator();
     }
 
@@ -43,7 +51,7 @@ public class InteractiveExample {
 
         try {
             // First get available tool IDs
-            List<String> toolIds = api.toolIds(null, null);
+            List<String> toolIds = experimentalApi.toolIds(null, null);
             logger.info("Available tool IDs count: {}", toolIds.size());
 
             if (!toolIds.isEmpty()) {
@@ -55,7 +63,7 @@ public class InteractiveExample {
             // Note: toolList requires provider and model parameters
             // Using common defaults - adjust based on your server configuration
             try {
-                List<ToolListItem> tools = api.toolList("zai", "glm-4.7", null, null);
+                List<ToolListItem> tools = experimentalApi.toolList("zai", "glm-4.7", null, null);
                 logger.info("\nDetailed tool list (provider=zai, model=glm-4.7):");
                 logger.info("  Tools count: {}", tools.size());
 
@@ -81,7 +89,7 @@ public class InteractiveExample {
 
         try {
             // List pending questions
-            List<QuestionRequest> questions = api.questionList(null, null);
+            List<QuestionRequest> questions = questionApi.questionList(null, null);
             logger.info("Pending questions count: {}", questions.size());
 
             if (!questions.isEmpty()) {
@@ -126,7 +134,7 @@ public class InteractiveExample {
             answers.add(sampleAnswer);
             replyRequest.setAnswers(answers);
 
-            boolean success = api.questionReply(questionId, null, null, replyRequest);
+            boolean success = questionApi.questionReply(questionId, null, null, replyRequest);
             logger.info("Question reply successful: {}", success);
 
         } catch (ApiException e) {
@@ -139,7 +147,7 @@ public class InteractiveExample {
         logger.info("Question ID: {}", questionId);
 
         try {
-            boolean success = api.questionReject(questionId, null, null);
+            boolean success = questionApi.questionReject(questionId, null, null);
             logger.info("Question rejection successful: {}", success);
 
         } catch (ApiException e) {
@@ -152,7 +160,7 @@ public class InteractiveExample {
 
         try {
             // List pending permission requests
-            List<PermissionRequest> permissions = api.permissionList(null, null);
+            List<PermissionRequest> permissions = permissionApi.permissionList(null, null);
             logger.info("Pending permission requests count: {}", permissions.size());
 
             if (!permissions.isEmpty()) {
@@ -194,7 +202,7 @@ public class InteractiveExample {
             replyRequest.setReply(PermissionReplyRequest.ReplyEnum.ONCE);
             replyRequest.setMessage("Approved by Java SDK example");
 
-            boolean success = api.permissionReply(permissionId, null, null, replyRequest);
+            boolean success = permissionApi.permissionReply(permissionId, null, null, replyRequest);
             logger.info("Permission reply successful: {}", success);
             logger.info("Action reply: ONCE (allowed once)");
 
@@ -212,10 +220,9 @@ public class InteractiveExample {
         String credentials = "opencode:opencode123";
         String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
         apiClient.setRequestInterceptor(builder -> builder.header("Authorization", "Basic " + encoded));
-        DefaultApi api = new DefaultApi(apiClient);
 
         try {
-            InteractiveExample example = new InteractiveExample(api);
+            InteractiveExample example = new InteractiveExample(apiClient);
             example.demonstrateInteractiveApis();
 
             logger.info("\n============================");

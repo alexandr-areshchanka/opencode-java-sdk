@@ -2,7 +2,7 @@ package opencode.examples.plainjava;
 
 import opencode.examples.plainjava.testing.ExampleContext;
 import opencode.examples.plainjava.testing.ResponseValidator;
-import opencode.sdk.api.DefaultApi;
+import opencode.sdk.api.SessionApi;
 import opencode.sdk.invoker.ApiClient;
 import opencode.sdk.invoker.ApiException;
 import opencode.sdk.model.Session;
@@ -17,16 +17,16 @@ public class TodoExample {
 
     private static final Logger logger = LoggerFactory.getLogger(TodoExample.class);
 
-    private final DefaultApi api;
+    private final SessionApi sessionApi;
     private final ResponseValidator validator;
 
-    public TodoExample(DefaultApi api) {
-        this.api = api;
+    public TodoExample(ApiClient apiClient) {
+        this.sessionApi = new SessionApi(apiClient);
         this.validator = null;
     }
 
     public TodoExample(ExampleContext context) {
-        this.api = context.getDefaultApi();
+        this.sessionApi = new SessionApi(context.getApiClient());
         this.validator = context.getValidator();
     }
 
@@ -36,9 +36,11 @@ public class TodoExample {
 
             // First, we need a session to get todos from
             // List available sessions to find one with potential todos
-            List<Session> sessions = api.sessionList(
+            List<Session> sessions = sessionApi.sessionList(
                     null,  // directory
                     null,  // workspace
+                    null,  // scope
+                    null,  // path
                     null,  // roots
                     null,  // start
                     null,  // search
@@ -70,7 +72,7 @@ public class TodoExample {
     private void listTodos(String sessionId) throws ApiException {
         logger.info("\n--- Listing Todos for Session: {} ---", sessionId);
 
-        List<Todo> todos = api.sessionTodo(
+        List<Todo> todos = sessionApi.sessionTodo(
                 sessionId,
                 null,  // directory
                 null   // workspace
@@ -105,10 +107,9 @@ public class TodoExample {
             String credentials = "opencode:opencode123";
             String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
             apiClient.setRequestInterceptor(builder -> builder.header("Authorization", "Basic " + encoded));
-            DefaultApi api = new DefaultApi(apiClient);
 
             // Run the example
-            TodoExample example = new TodoExample(api);
+            TodoExample example = new TodoExample(apiClient);
             example.demonstrateTodoOperations();
 
         } catch (Exception e) {

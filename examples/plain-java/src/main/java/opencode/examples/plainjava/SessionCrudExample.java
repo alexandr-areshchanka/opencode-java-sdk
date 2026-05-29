@@ -3,7 +3,7 @@ package opencode.examples.plainjava;
 import opencode.examples.plainjava.testing.ExampleContext;
 import opencode.examples.plainjava.testing.ResourceTracker;
 import opencode.examples.plainjava.testing.ResponseValidator;
-import opencode.sdk.api.DefaultApi;
+import opencode.sdk.api.GlobalApi;
 import opencode.sdk.api.SessionApi;
 import opencode.sdk.invoker.ApiClient;
 import opencode.sdk.invoker.ApiException;
@@ -21,24 +21,21 @@ public class SessionCrudExample {
 
     private static final Logger logger = LoggerFactory.getLogger(SessionCrudExample.class);
 
-    private final DefaultApi api;
-    private final ApiClient apiClient;
     private final SessionApi sessionApi;
+    private final GlobalApi globalApi;
     private final ResponseValidator validator;
     private final ResourceTracker tracker;
 
-    public SessionCrudExample(DefaultApi api, ApiClient apiClient) {
-        this.api = api;
-        this.apiClient = apiClient;
+    public SessionCrudExample(ApiClient apiClient) {
         this.sessionApi = new SessionApi(apiClient);
+        this.globalApi = new GlobalApi(apiClient);
         this.validator = null;
         this.tracker = null;
     }
 
     public SessionCrudExample(ExampleContext context) {
-        this.api = context.getDefaultApi();
-        this.apiClient = context.getApiClient();
-        this.sessionApi = new SessionApi(apiClient);
+        this.sessionApi = new SessionApi(context.getApiClient());
+        this.globalApi = new GlobalApi(context.getApiClient());
         this.validator = context.getValidator();
         this.tracker = context.getResourceTracker();
     }
@@ -78,9 +75,11 @@ public class SessionCrudExample {
     private void listSessions() throws ApiException {
         logger.info("\n--- Listing Sessions ---");
 
-        List<Session> sessions = api.sessionList(
+        List<Session> sessions = sessionApi.sessionList(
                 null,  // directory
                 null,  // workspace
+                null,  // scope
+                null,  // path
                 null,  // roots - only root sessions
                 null,  // start - filter by timestamp
                 null,  // search - filter by title
@@ -109,7 +108,7 @@ public class SessionCrudExample {
         SessionCreateRequest request = new SessionCreateRequest();
         request.setTitle(title);
 
-        Session session = api.sessionCreate(
+        Session session = sessionApi.sessionCreate(
                 null,  // directory
                 null,  // workspace
                 request
@@ -157,7 +156,7 @@ public class SessionCrudExample {
         SessionUpdateRequest request = new SessionUpdateRequest();
         request.setTitle(newTitle);
 
-        api.sessionUpdate(
+        sessionApi.sessionUpdate(
                 sessionId,
                 null,  // directory
                 null,  // workspace
@@ -170,7 +169,7 @@ public class SessionCrudExample {
     private void deleteSession(String sessionId) throws ApiException {
         logger.info("\n--- Deleting Session: {} ---", sessionId);
 
-        Boolean result = api.sessionDelete(
+        Boolean result = sessionApi.sessionDelete(
                 sessionId,
                 null,  // directory
                 null   // workspace
@@ -192,15 +191,15 @@ public class SessionCrudExample {
         String credentials = "opencode:opencode123";
         String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
         apiClient.setRequestInterceptor(builder -> builder.header("Authorization", "Basic " + encoded));
-        DefaultApi api = new DefaultApi(apiClient);
 
         try {
             // Verify connection with health check
-            var health = api.globalHealth();
+            GlobalApi globalApi = new GlobalApi(apiClient);
+            var health = globalApi.globalHealth();
             logger.info("Connected to OpenCode server (version: {})", health.getVersion());
 
             // Run the example
-            SessionCrudExample example = new SessionCrudExample(api, apiClient);
+            SessionCrudExample example = new SessionCrudExample(apiClient);
             example.demonstrateSessionCrud();
 
             logger.info("Session CRUD Example completed");

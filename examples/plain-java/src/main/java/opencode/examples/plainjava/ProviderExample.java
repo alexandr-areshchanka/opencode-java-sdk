@@ -2,12 +2,12 @@ package opencode.examples.plainjava;
 
 import opencode.examples.plainjava.testing.ExampleContext;
 import opencode.examples.plainjava.testing.ResponseValidator;
-import opencode.sdk.api.DefaultApi;
+import opencode.sdk.api.ProviderApi;
 import opencode.sdk.invoker.ApiClient;
 import opencode.sdk.invoker.ApiException;
+import opencode.sdk.model.Provider;
 import opencode.sdk.model.ProviderAuthMethod;
 import opencode.sdk.model.ProviderList200Response;
-import opencode.sdk.model.ProviderList200ResponseAllInner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,16 +19,16 @@ public class ProviderExample {
 
     private static final Logger logger = LoggerFactory.getLogger(ProviderExample.class);
 
-    private final DefaultApi api;
+    private final ProviderApi providerApi;
     private final ResponseValidator validator;
 
-    public ProviderExample(DefaultApi api) {
-        this.api = api;
+    public ProviderExample(ApiClient apiClient) {
+        this.providerApi = new ProviderApi(apiClient);
         this.validator = null;
     }
 
     public ProviderExample(ExampleContext context) {
-        this.api = context.getDefaultApi();
+        this.providerApi = new ProviderApi(context.getApiClient());
         this.validator = context.getValidator();
     }
 
@@ -54,7 +54,7 @@ public class ProviderExample {
     private void listProviders() throws ApiException {
         logger.info("\n--- Listing AI Providers ---");
 
-        ProviderList200Response response = api.providerList(
+        ProviderList200Response response = providerApi.providerList(
                 null,  // directory
                 null   // workspace
         );
@@ -63,7 +63,7 @@ public class ProviderExample {
             validator.validateNonNull(response, "provider list response");
         }
 
-        List<ProviderList200ResponseAllInner> allProviders = response.getAll();
+        List<Provider> allProviders = response.getAll();
         List<String> connectedProviders = response.getConnected();
         Map<String, String> defaults = response.getDefault();
 
@@ -72,7 +72,7 @@ public class ProviderExample {
         }
 
         logger.info("Found {} providers:", allProviders.size());
-        for (ProviderList200ResponseAllInner provider : allProviders) {
+        for (Provider provider : allProviders) {
             if (validator != null) {
                 validator.validateNonNull(provider.getId(), "provider id");
                 validator.validateNonNull(provider.getName(), "provider name");
@@ -80,12 +80,7 @@ public class ProviderExample {
 
             logger.info("  - ID: {}", provider.getId());
             logger.info("    Name: {}", provider.getName());
-            if (provider.getApi() != null) {
-                logger.info("    API: {}", provider.getApi());
-            }
-            if (provider.getNpm() != null) {
-                logger.info("    NPM: {}", provider.getNpm());
-            }
+            // TODO: Provider.getApi() and Provider.getNpm() fields were removed from the model
             logger.info("    Environment Variables: {}", provider.getEnv());
             logger.info("    Models: {} model(s)", provider.getModels().size());
         }
@@ -105,7 +100,7 @@ public class ProviderExample {
     private void getAuthMethods() throws ApiException {
         logger.info("\n--- Getting Provider Auth Methods ---");
 
-        Map<String, List<ProviderAuthMethod>> authMethods = api.providerAuth(
+        Map<String, List<ProviderAuthMethod>> authMethods = providerApi.providerAuth(
                 null,  // directory
                 null   // workspace
         );
@@ -146,11 +141,10 @@ public class ProviderExample {
         String credentials = "opencode:opencode123";
         String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
         apiClient.setRequestInterceptor(builder -> builder.header("Authorization", "Basic " + encoded));
-        DefaultApi api = new DefaultApi(apiClient);
 
         try {
             // Run the example
-            ProviderExample example = new ProviderExample(api);
+            ProviderExample example = new ProviderExample(apiClient);
             example.demonstrateProviders();
 
             logger.info("\n");

@@ -2,7 +2,8 @@ package opencode.examples.plainjava;
 
 import opencode.examples.plainjava.testing.ExampleContext;
 import opencode.examples.plainjava.testing.ResponseValidator;
-import opencode.sdk.api.DefaultApi;
+import opencode.sdk.api.GlobalApi;
+import opencode.sdk.api.InstanceApi;
 import opencode.sdk.invoker.ApiClient;
 import opencode.sdk.invoker.ApiException;
 import opencode.sdk.model.Agent;
@@ -19,16 +20,19 @@ public class SystemInfoExample {
 
     private static final Logger logger = LoggerFactory.getLogger(SystemInfoExample.class);
 
-    private final DefaultApi api;
+    private final GlobalApi globalApi;
+    private final InstanceApi instanceApi;
     private final ResponseValidator validator;
 
-    public SystemInfoExample(DefaultApi api) {
-        this.api = api;
+    public SystemInfoExample(ApiClient apiClient) {
+        this.globalApi = new GlobalApi(apiClient);
+        this.instanceApi = new InstanceApi(apiClient);
         this.validator = null;
     }
 
     public SystemInfoExample(ExampleContext context) {
-        this.api = context.getDefaultApi();
+        this.globalApi = new GlobalApi(context.getApiClient());
+        this.instanceApi = new InstanceApi(context.getApiClient());
         this.validator = context.getValidator();
     }
 
@@ -60,7 +64,7 @@ public class SystemInfoExample {
     private void checkHealth() throws ApiException {
         logger.info("\n--- Checking Server Health ---");
 
-        GlobalHealth200Response health = api.globalHealth();
+        GlobalHealth200Response health = globalApi.globalHealth();
 
         if (validator != null) {
             validator.validateNonNull(health, "health response");
@@ -76,7 +80,7 @@ public class SystemInfoExample {
     private void listAgents() throws ApiException {
         logger.info("\n--- Listing Agents ---");
 
-        List<Agent> agents = api.appAgents(
+        List<Agent> agents = instanceApi.appAgents(
                 null,  // directory
                 null   // workspace
         );
@@ -106,7 +110,7 @@ public class SystemInfoExample {
     private void listSkills() throws ApiException {
         logger.info("\n--- Listing Skills ---");
 
-        List<AppSkills200ResponseInner> skills = api.appSkills(
+        List<AppSkills200ResponseInner> skills = instanceApi.appSkills(
                 null,  // directory
                 null   // workspace
         );
@@ -130,7 +134,7 @@ public class SystemInfoExample {
     private void listCommands() throws ApiException {
         logger.info("\n--- Listing Commands ---");
 
-        List<Command> commands = api.commandList(
+        List<Command> commands = instanceApi.commandList(
                 null,  // directory
                 null   // workspace
         );
@@ -168,11 +172,10 @@ public class SystemInfoExample {
         String credentials = "opencode:opencode123";
         String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
         apiClient.setRequestInterceptor(builder -> builder.header("Authorization", "Basic " + encoded));
-        DefaultApi api = new DefaultApi(apiClient);
 
         try {
             // Run the example
-            SystemInfoExample example = new SystemInfoExample(api);
+            SystemInfoExample example = new SystemInfoExample(apiClient);
             example.demonstrateSystemInfo();
 
             logger.info("\n");

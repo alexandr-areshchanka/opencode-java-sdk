@@ -1,6 +1,6 @@
 package opencode.examples.plainjava;
 
-import opencode.sdk.api.DefaultApi;
+import opencode.sdk.api.GlobalApi;
 import opencode.sdk.invoker.ApiClient;
 import opencode.sdk.invoker.ApiException;
 import org.slf4j.Logger;
@@ -22,58 +22,57 @@ public class Main {
         String credentials = "opencode:opencode123";
         String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
         apiClient.setRequestInterceptor(builder -> builder.header("Authorization", "Basic " + encoded));
-        DefaultApi api = new DefaultApi(apiClient);
 
         try {
             // First, verify connection with health check
-            performHealthCheck(api);
+            performHealthCheck(new GlobalApi(apiClient));
 
             // Run System Info Example
             logger.info("\n");
             logger.info("========================================");
-            SystemInfoExample systemInfoExample = new SystemInfoExample(api);
+            SystemInfoExample systemInfoExample = new SystemInfoExample(apiClient);
             systemInfoExample.demonstrateSystemInfo();
 
             // Run Configuration Example
             logger.info("\n");
             logger.info("========================================");
-            ConfigurationExample configurationExample = new ConfigurationExample(api);
+            ConfigurationExample configurationExample = new ConfigurationExample(apiClient);
             configurationExample.demonstrateConfiguration();
 
             // Run Provider Example
             logger.info("\n");
             logger.info("========================================");
-            ProviderExample providerExample = new ProviderExample(api);
+            ProviderExample providerExample = new ProviderExample(apiClient);
             providerExample.demonstrateProviders();
 
             // Run Project Example
             logger.info("\n");
             logger.info("========================================");
-            ProjectExample projectExample = new ProjectExample(api);
+            ProjectExample projectExample = new ProjectExample(apiClient);
             projectExample.demonstrateProjectOperations();
 
             // Run File Operations Example
             logger.info("\n");
             logger.info("========================================");
-            FileOperationsExample fileOperationsExample = new FileOperationsExample(api);
+            FileOperationsExample fileOperationsExample = new FileOperationsExample(apiClient);
             fileOperationsExample.demonstrateFileOperations();
 
             // Run Session CRUD Example
             logger.info("\n");
             logger.info("========================================");
-            SessionCrudExample sessionCrudExample = new SessionCrudExample(api, apiClient);
+            SessionCrudExample sessionCrudExample = new SessionCrudExample(apiClient);
             sessionCrudExample.demonstrateSessionCrud();
 
             // Run Session Advanced Example
             logger.info("\n");
             logger.info("========================================");
-            SessionAdvancedExample sessionAdvancedExample = new SessionAdvancedExample(api, apiClient);
+            SessionAdvancedExample sessionAdvancedExample = new SessionAdvancedExample(apiClient);
             sessionAdvancedExample.demonstrateAdvancedSessionOperations();
 
             // Run Message Example
             logger.info("\n");
             logger.info("========================================");
-            MessageExample messageExample = new MessageExample(api);
+            MessageExample messageExample = new MessageExample(apiClient);
             messageExample.demonstrateMessaging();
 
             // ========== Phase 2 Examples ==========
@@ -81,55 +80,55 @@ public class Main {
             // Run DevTools Example
             logger.info("\n");
             logger.info("========================================");
-            DevToolsExample devToolsExample = new DevToolsExample(api);
+            DevToolsExample devToolsExample = new DevToolsExample(apiClient);
             devToolsExample.demonstrateDevTools();
 
             // Run Experimental Example
             logger.info("\n");
             logger.info("========================================");
-            ExperimentalExample experimentalExample = new ExperimentalExample(api);
+            ExperimentalExample experimentalExample = new ExperimentalExample(apiClient);
             experimentalExample.demonstrateExperimentalApis();
 
             // Run Instance Example
             logger.info("\n");
             logger.info("========================================");
-            InstanceExample instanceExample = new InstanceExample(api);
+            InstanceExample instanceExample = new InstanceExample(apiClient);
             instanceExample.demonstrateInstanceManagement();
 
             // Run Interactive Example
             logger.info("\n");
             logger.info("========================================");
-            InteractiveExample interactiveExample = new InteractiveExample(api);
+            InteractiveExample interactiveExample = new InteractiveExample(apiClient);
             interactiveExample.demonstrateInteractiveApis();
 
             // Run MCP Example
             logger.info("\n");
             logger.info("========================================");
-            McpExample mcpExample = new McpExample(api);
+            McpExample mcpExample = new McpExample(apiClient);
             mcpExample.demonstrateMcpOperations();
 
             // Run Todo Example
             logger.info("\n");
             logger.info("========================================");
-            TodoExample todoExample = new TodoExample(api);
+            TodoExample todoExample = new TodoExample(apiClient);
             todoExample.demonstrateTodoOperations();
 
             // Run VCS Example
             logger.info("\n");
             logger.info("========================================");
-            VcsExample vcsExample = new VcsExample(api);
+            VcsExample vcsExample = new VcsExample(apiClient);
             vcsExample.demonstrateVcsOperations();
 
             // Run Event Streaming Example
             logger.info("\n");
             logger.info("========================================");
-            EventStreamingExample eventStreamingExample = new EventStreamingExample(api);
+            EventStreamingExample eventStreamingExample = new EventStreamingExample(apiClient);
             eventStreamingExample.demonstrateEventStreaming();
 
             // Run PTY Example
             logger.info("\n");
             logger.info("========================================");
-            PtyExample ptyExample = new PtyExample(api);
+            PtyExample ptyExample = new PtyExample(apiClient);
             ptyExample.demonstratePtyOperations();
 
             logger.info("\n");
@@ -142,11 +141,11 @@ public class Main {
         }
     }
 
-    private static void performHealthCheck(DefaultApi api) {
+    private static void performHealthCheck(GlobalApi globalApi) {
         logger.info("\n--- Health Check ---");
 
         try {
-            var health = api.globalHealth();
+            var health = globalApi.globalHealth();
             logger.info("Health check successful!");
             logger.info("  Healthy: {}", health.getHealthy());
             logger.info("  Version: {}", health.getVersion());

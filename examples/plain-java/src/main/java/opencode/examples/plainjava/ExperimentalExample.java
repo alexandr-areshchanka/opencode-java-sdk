@@ -1,9 +1,9 @@
 package opencode.examples.plainjava;
 
 import opencode.examples.plainjava.testing.ExampleContext;
-import opencode.examples.plainjava.testing.ResourceTracker;
 import opencode.examples.plainjava.testing.ResponseValidator;
-import opencode.sdk.api.DefaultApi;
+import opencode.sdk.api.ExperimentalApi;
+import opencode.sdk.api.WorkspaceApi;
 import opencode.sdk.invoker.ApiClient;
 import opencode.sdk.invoker.ApiException;
 import opencode.sdk.model.ExperimentalWorkspaceCreateRequest;
@@ -22,16 +22,19 @@ public class ExperimentalExample {
 
     private static final Logger logger = LoggerFactory.getLogger(ExperimentalExample.class);
 
-    private final DefaultApi api;
+    private final ExperimentalApi experimentalApi;
+    private final WorkspaceApi workspaceApi;
     private final ResponseValidator validator;
 
-    public ExperimentalExample(DefaultApi api) {
-        this.api = api;
+    public ExperimentalExample(ApiClient apiClient) {
+        this.experimentalApi = new ExperimentalApi(apiClient);
+        this.workspaceApi = new WorkspaceApi(apiClient);
         this.validator = null;
     }
 
     public ExperimentalExample(ExampleContext context) {
-        this.api = context.getDefaultApi();
+        this.experimentalApi = new ExperimentalApi(context.getApiClient());
+        this.workspaceApi = new WorkspaceApi(context.getApiClient());
         this.validator = context.getValidator();
     }
 
@@ -66,7 +69,7 @@ public class ExperimentalExample {
     private void listGlobalSessions() throws ApiException {
         logger.info("\n--- Listing Global Sessions ---");
 
-        List<GlobalSession> sessions = api.experimentalSessionList(
+        List<GlobalSession> sessions = experimentalApi.experimentalSessionList(
                 null,  // directory
                 null,  // workspace
                 null,  // roots
@@ -96,7 +99,7 @@ public class ExperimentalExample {
     private void listWorkspaces() throws ApiException {
         logger.info("\n--- Listing Workspaces ---");
 
-        List<Workspace> workspaces = api.experimentalWorkspaceList(
+        List<Workspace> workspaces = workspaceApi.experimentalWorkspaceList(
                 null,  // directory
                 null   // workspace
         );
@@ -124,7 +127,7 @@ public class ExperimentalExample {
         request.setType("git");
         request.setBranch("main");
 
-        Workspace workspace = api.experimentalWorkspaceCreate(
+        Workspace workspace = workspaceApi.experimentalWorkspaceCreate(
                 null,  // directory
                 null,  // workspace
                 request
@@ -141,7 +144,7 @@ public class ExperimentalExample {
     private void listMcpResources() throws ApiException {
         logger.info("\n--- Listing MCP Resources ---");
 
-        Map<String, McpResource> resources = api.experimentalResourceList(
+        Map<String, McpResource> resources = experimentalApi.experimentalResourceList(
                 null,  // directory
                 null   // workspace
         );
@@ -164,10 +167,9 @@ public class ExperimentalExample {
             String credentials = "opencode:opencode123";
             String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
             apiClient.setRequestInterceptor(builder -> builder.header("Authorization", "Basic " + encoded));
-            DefaultApi api = new DefaultApi(apiClient);
 
             // Run the example
-            ExperimentalExample example = new ExperimentalExample(api);
+            ExperimentalExample example = new ExperimentalExample(apiClient);
             example.demonstrateExperimentalApis();
 
         } catch (Exception e) {

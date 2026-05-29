@@ -2,7 +2,7 @@ package opencode.examples.plainjava;
 
 import opencode.examples.plainjava.testing.ExampleContext;
 import opencode.examples.plainjava.testing.ResponseValidator;
-import opencode.sdk.api.DefaultApi;
+import opencode.sdk.api.InstanceApi;
 import opencode.sdk.invoker.ApiClient;
 import opencode.sdk.invoker.ApiException;
 import opencode.sdk.model.FormatterStatus;
@@ -17,16 +17,16 @@ public class DevToolsExample {
 
     private static final Logger logger = LoggerFactory.getLogger(DevToolsExample.class);
 
-    private final DefaultApi api;
+    private final InstanceApi instanceApi;
     private final ResponseValidator validator;
 
-    public DevToolsExample(DefaultApi api) {
-        this.api = api;
+    public DevToolsExample(ApiClient apiClient) {
+        this.instanceApi = new InstanceApi(apiClient);
         this.validator = null;
     }
 
     public DevToolsExample(ExampleContext context) {
-        this.api = context.getDefaultApi();
+        this.instanceApi = new InstanceApi(context.getApiClient());
         this.validator = context.getValidator();
     }
 
@@ -52,7 +52,7 @@ public class DevToolsExample {
     private void getLspStatus() throws ApiException {
         logger.info("\n--- Getting LSP Server Status ---");
 
-        List<LSPStatus> lspStatuses = api.lspStatus(
+        List<LSPStatus> lspStatuses = instanceApi.lspStatus(
                 null,  // directory
                 null   // workspace
         );
@@ -78,7 +78,7 @@ public class DevToolsExample {
     private void getFormatterStatus() throws ApiException {
         logger.info("\n--- Getting Formatter Status ---");
 
-        List<FormatterStatus> formatterStatuses = api.formatterStatus(
+        List<FormatterStatus> formatterStatuses = instanceApi.formatterStatus(
                 null,  // directory
                 null   // workspace
         );
@@ -109,11 +109,10 @@ public class DevToolsExample {
         String credentials = "opencode:opencode123";
         String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
         apiClient.setRequestInterceptor(builder -> builder.header("Authorization", "Basic " + encoded));
-        DefaultApi api = new DefaultApi(apiClient);
 
         try {
             // Run the example
-            DevToolsExample example = new DevToolsExample(api);
+            DevToolsExample example = new DevToolsExample(apiClient);
             example.demonstrateDevTools();
 
             logger.info("\n");

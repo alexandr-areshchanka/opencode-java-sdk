@@ -2,7 +2,6 @@ package opencode.examples.plainjava;
 
 import opencode.examples.plainjava.testing.ExampleContext;
 import opencode.examples.plainjava.testing.ResponseValidator;
-import opencode.sdk.api.DefaultApi;
 import opencode.sdk.invoker.ApiClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,16 +12,13 @@ public class InstanceExample {
 
     private static final Logger logger = LoggerFactory.getLogger(InstanceExample.class);
 
-    private final DefaultApi api;
     private final ResponseValidator validator;
 
-    public InstanceExample(DefaultApi api) {
-        this.api = api;
+    public InstanceExample(ApiClient apiClient) {
         this.validator = null;
     }
 
     public InstanceExample(ExampleContext context) {
-        this.api = context.getDefaultApi();
         this.validator = context.getValidator();
     }
 
@@ -72,7 +68,8 @@ public class InstanceExample {
         logger.info("  - Terminates any active sessions within that instance");
         logger.info("");
         logger.info("Example usage:");
-        logger.info("  Boolean result = api.instanceDispose(null, null);");
+        logger.info("  InstanceApi instanceApi = new InstanceApi(apiClient);");
+        logger.info("  Boolean result = instanceApi.instanceDispose(null, null);");
         logger.info("  if (result) {");
         logger.info("      logger.info(\"Instance disposed successfully\");");
         logger.info("  }");
@@ -92,7 +89,8 @@ public class InstanceExample {
         logger.warn("⚠️  This is the most DESTRUCTIVE operation and should be used with extreme caution!");
         logger.info("");
         logger.info("Example usage:");
-        logger.info("  Boolean result = api.globalDispose();");
+        logger.info("  GlobalApi globalApi = new GlobalApi(apiClient);");
+        logger.info("  Boolean result = globalApi.globalDispose();");
         logger.info("  if (result) {");
         logger.info("      logger.info(\"All instances disposed successfully\");");
         logger.info("  }");
@@ -108,11 +106,10 @@ public class InstanceExample {
         String credentials = "opencode:opencode123";
         String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
         apiClient.setRequestInterceptor(builder -> builder.header("Authorization", "Basic " + encoded));
-        DefaultApi api = new DefaultApi(apiClient);
 
         try {
             // Run the example
-            InstanceExample example = new InstanceExample(api);
+            InstanceExample example = new InstanceExample(apiClient);
             example.demonstrateInstanceManagement();
 
             logger.info("\n");

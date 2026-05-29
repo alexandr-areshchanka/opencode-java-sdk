@@ -1,6 +1,6 @@
 package opencode.examples.plainjava.testing;
 
-import opencode.sdk.api.DefaultApi;
+import opencode.sdk.api.SessionApi;
 import opencode.sdk.invoker.ApiClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -101,17 +101,15 @@ public class TestExecutor {
             apiClient.setRequestInterceptor(builder -> builder.header("Authorization", "Basic " + encoded));
         }
 
-        DefaultApi defaultApi = new DefaultApi(apiClient);
-
         // Initialize cleanup manager
         if (cleanupManager == null) {
-            cleanupManager = new CleanupManager(defaultApi, testLogger);
+            cleanupManager = new CleanupManager(new SessionApi(apiClient), testLogger);
         }
 
         ResourceTracker tracker = new ResourceTracker();
         ResponseValidator validator = new ResponseValidator();
 
-        return new ExampleContext(defaultApi, apiClient, config, tracker, validator);
+        return new ExampleContext(apiClient, config, tracker, validator);
     }
 
     private Object createExampleInstance(Class<?> exampleClass, ExampleContext context) throws Exception {
@@ -120,10 +118,10 @@ public class TestExecutor {
             Constructor<?> contextConstructor = exampleClass.getConstructor(ExampleContext.class);
             return contextConstructor.newInstance(context);
         } catch (NoSuchMethodException e) {
-            // Fall back to constructor that accepts DefaultApi
+            // Fall back to constructor that accepts ApiClient
             try {
-                Constructor<?> apiConstructor = exampleClass.getConstructor(DefaultApi.class);
-                return apiConstructor.newInstance(context.getDefaultApi());
+                Constructor<?> apiConstructor = exampleClass.getConstructor(ApiClient.class);
+                return apiConstructor.newInstance(context.getApiClient());
             } catch (NoSuchMethodException ex) {
                 throw new RuntimeException("No suitable constructor found for example class: " + exampleClass.getName());
             }

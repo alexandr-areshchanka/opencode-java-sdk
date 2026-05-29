@@ -2,7 +2,8 @@ package opencode.examples.plainjava;
 
 import opencode.examples.plainjava.testing.ExampleContext;
 import opencode.examples.plainjava.testing.ResponseValidator;
-import opencode.sdk.api.DefaultApi;
+import opencode.sdk.api.ExperimentalApi;
+import opencode.sdk.api.McpApi;
 import opencode.sdk.invoker.ApiClient;
 import opencode.sdk.invoker.ApiException;
 import opencode.sdk.model.*;
@@ -17,16 +18,19 @@ public class McpExample {
 
     private static final Logger logger = LoggerFactory.getLogger(McpExample.class);
 
-    private final DefaultApi api;
+    private final McpApi mcpApi;
+    private final ExperimentalApi experimentalApi;
     private final ResponseValidator validator;
 
-    public McpExample(DefaultApi api) {
-        this.api = api;
+    public McpExample(ApiClient apiClient) {
+        this.mcpApi = new McpApi(apiClient);
+        this.experimentalApi = new ExperimentalApi(apiClient);
         this.validator = null;
     }
 
     public McpExample(ExampleContext context) {
-        this.api = context.getDefaultApi();
+        this.mcpApi = new McpApi(context.getApiClient());
+        this.experimentalApi = new ExperimentalApi(context.getApiClient());
         this.validator = context.getValidator();
     }
 
@@ -62,7 +66,7 @@ public class McpExample {
     private void getMcpStatus() throws ApiException {
         logger.info("\n--- Getting MCP Status ---");
 
-        Map<String, MCPStatus> statusMap = api.mcpStatus(
+        Map<String, MCPStatus> statusMap = mcpApi.mcpStatus(
                 null,  // directory
                 null   // workspace
         );
@@ -100,7 +104,7 @@ public class McpExample {
         request.setName(name);
         request.setConfig(config);
 
-        Map<String, MCPStatus> result = api.mcpAdd(
+        Map<String, MCPStatus> result = mcpApi.mcpAdd(
                 null,    // directory
                 null,    // workspace
                 request
@@ -119,7 +123,7 @@ public class McpExample {
     private void connectMcpServer(String name) throws ApiException {
         logger.info("\n--- Connecting to MCP Server: {} ---", name);
 
-        Boolean result = api.mcpConnect(
+        Boolean result = mcpApi.mcpConnect(
                 name,    // server name
                 null,    // directory
                 null     // workspace
@@ -135,7 +139,7 @@ public class McpExample {
     private void listMcpResources() throws ApiException {
         logger.info("\n--- Listing MCP Resources ---");
 
-        Map<String, McpResource> resources = api.experimentalResourceList(
+        Map<String, McpResource> resources = experimentalApi.experimentalResourceList(
                 null,  // directory
                 null   // workspace
         );
@@ -163,7 +167,7 @@ public class McpExample {
         logger.info("\n--- Starting MCP OAuth Flow: {} ---", name);
 
         try {
-            McpAuthStart200Response response = api.mcpAuthStart(
+            McpAuthStart200Response response = mcpApi.mcpAuthStart(
                     name,    // server name
                     null,    // directory
                     null     // workspace
@@ -193,11 +197,10 @@ public class McpExample {
         String credentials = "opencode:opencode123";
         String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
         apiClient.setRequestInterceptor(builder -> builder.header("Authorization", "Basic " + encoded));
-        DefaultApi api = new DefaultApi(apiClient);
 
         try {
             // Run the example
-            McpExample example = new McpExample(api);
+            McpExample example = new McpExample(apiClient);
             example.demonstrateMcpOperations();
 
             logger.info("\n");
