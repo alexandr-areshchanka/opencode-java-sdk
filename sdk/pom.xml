@@ -192,6 +192,9 @@
                                 <replace token="Integer archived" value="Long archived" dir="${project.build.directory}/generated-sources/openapi/src/main/java/opencode/sdk/model">
                                     <include name="*.java"/>
                                 </replace>
+                                <replace token="Integer completed" value="Long completed" dir="${project.build.directory}/generated-sources/openapi/src/main/java/opencode/sdk/model">
+                                    <include name="*.java"/>
+                                </replace>
                                 <replace token="Integer getCreated" value="Long getCreated" dir="${project.build.directory}/generated-sources/openapi/src/main/java/opencode/sdk/model">
                                     <include name="*.java"/>
                                 </replace>
@@ -207,6 +210,9 @@
                                 <replace token="Integer getArchived" value="Long getArchived" dir="${project.build.directory}/generated-sources/openapi/src/main/java/opencode/sdk/model">
                                     <include name="*.java"/>
                                 </replace>
+                                <replace token="Integer getCompleted" value="Long getCompleted" dir="${project.build.directory}/generated-sources/openapi/src/main/java/opencode/sdk/model">
+                                    <include name="*.java"/>
+                                </replace>
                                 <replace token="Integer setCreated" value="Long setCreated" dir="${project.build.directory}/generated-sources/openapi/src/main/java/opencode/sdk/model">
                                     <include name="*.java"/>
                                 </replace>
@@ -220,6 +226,9 @@
                                     <include name="*.java"/>
                                 </replace>
                                 <replace token="Integer setArchived" value="Long setArchived" dir="${project.build.directory}/generated-sources/openapi/src/main/java/opencode/sdk/model">
+                                    <include name="*.java"/>
+                                </replace>
+                                <replace token="Integer setCompleted" value="Long setCompleted" dir="${project.build.directory}/generated-sources/openapi/src/main/java/opencode/sdk/model">
                                     <include name="*.java"/>
                                 </replace>
                                 <echo message="Timestamp field fixes applied"/>
