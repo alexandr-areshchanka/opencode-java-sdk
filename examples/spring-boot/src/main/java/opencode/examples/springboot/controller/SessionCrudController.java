@@ -2,10 +2,7 @@ package opencode.examples.springboot.controller;
 
 import lombok.RequiredArgsConstructor;
 import opencode.sdk.invoker.ApiException;
-import opencode.sdk.model.Session;
-import opencode.sdk.model.SessionCreateRequest;
-import opencode.sdk.model.SessionInitRequest;
-import opencode.sdk.model.SessionUpdateRequest;
+import opencode.sdk.model.*;
 import opencode.sdk.springboot.OpenCodeService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +22,7 @@ public class SessionCrudController {
 
     @GetMapping
     public List<Session> listSessions() throws ApiException {
-        return openCodeService.sessionApi().sessionList(null, null, null, null, null, null, null, null);
+        return openCodeService.sessionApi().sessionList(null, null, null, null, new ExperimentalSessionListRootsParameter(), null, null, null);
     }
 
     @PostMapping

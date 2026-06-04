@@ -7,6 +7,7 @@ import opencode.sdk.api.GlobalApi;
 import opencode.sdk.api.SessionApi;
 import opencode.sdk.invoker.ApiClient;
 import opencode.sdk.invoker.ApiException;
+import opencode.sdk.model.ExperimentalSessionListRootsParameter;
 import opencode.sdk.model.Session;
 import opencode.sdk.model.SessionCreateRequest;
 import opencode.sdk.model.SessionUpdateRequest;
@@ -80,7 +81,7 @@ public class SessionCrudExample {
                 null,  // workspace
                 null,  // scope
                 null,  // path
-                null,  // roots - only root sessions
+                new ExperimentalSessionListRootsParameter(),  // roots - only root sessions
                 null,  // start - filter by timestamp
                 null,  // search - filter by title
                 new BigDecimal("10")  // limit - max 10 sessions

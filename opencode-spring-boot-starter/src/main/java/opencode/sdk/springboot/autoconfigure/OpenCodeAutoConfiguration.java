@@ -1,5 +1,7 @@
 package opencode.sdk.springboot.autoconfigure;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import opencode.sdk.invoker.ApiClient;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -18,6 +20,11 @@ public class OpenCodeAutoConfiguration {
     @ConditionalOnMissingBean
     public ApiClient apiClient(OpenCodeProperties properties) {
         ApiClient client = new ApiClient();
+
+        // Use NON_EMPTY so default-initialized fields (e.g. empty lists) are not serialized
+        ObjectMapper mapper = ApiClient.createDefaultObjectMapper();
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+        client.setObjectMapper(mapper);
 
         if (properties.getBaseUrl() != null) {
             client.updateBaseUri(properties.getBaseUrl());

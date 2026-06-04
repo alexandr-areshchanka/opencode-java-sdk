@@ -163,6 +163,67 @@
 
                                 <echo message="OpenAPI Generator bug fixes applied"/>
 
+                                <!-- Fix NON_NULL -&gt; NON_EMPTY: empty lists should not be serialized -->
+                                <replace token="NON_NULL" value="NON_EMPTY" dir="${project.build.directory}/generated-sources/openapi/src/main/java/opencode/sdk/invoker">
+                                    <include name="ApiClient.java"/>
+                                </replace>
+                                <echo message="Fixed ObjectMapper serialization inclusion: NON_NULL -&gt; NON_EMPTY"/>
+
+                                <!-- Force HTTP/1.1: server does not support HTTP/2 -->
+                                <replace token="HttpClient.newBuilder()" value="HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1)" dir="${project.build.directory}/generated-sources/openapi/src/main/java/opencode/sdk/invoker">
+                                    <include name="ApiClient.java"/>
+                                </replace>
+                                <echo message="Fixed HttpClient: forced HTTP/1.1 (server does not support HTTP/2)"/>
+
+                                <echo message="Fixing timestamp fields: Integer -&gt; Long for millisecond epoch values"/>
+                                <!-- Replace Integer with Long for known timestamp field names -->
+                                <replace token="Integer created" value="Long created" dir="${project.build.directory}/generated-sources/openapi/src/main/java/opencode/sdk/model">
+                                    <include name="*.java"/>
+                                </replace>
+                                <replace token="Integer updated" value="Long updated" dir="${project.build.directory}/generated-sources/openapi/src/main/java/opencode/sdk/model">
+                                    <include name="*.java"/>
+                                </replace>
+                                <replace token="Integer initialized" value="Long initialized" dir="${project.build.directory}/generated-sources/openapi/src/main/java/opencode/sdk/model">
+                                    <include name="*.java"/>
+                                </replace>
+                                <replace token="Integer compacting" value="Long compacting" dir="${project.build.directory}/generated-sources/openapi/src/main/java/opencode/sdk/model">
+                                    <include name="*.java"/>
+                                </replace>
+                                <replace token="Integer archived" value="Long archived" dir="${project.build.directory}/generated-sources/openapi/src/main/java/opencode/sdk/model">
+                                    <include name="*.java"/>
+                                </replace>
+                                <replace token="Integer getCreated" value="Long getCreated" dir="${project.build.directory}/generated-sources/openapi/src/main/java/opencode/sdk/model">
+                                    <include name="*.java"/>
+                                </replace>
+                                <replace token="Integer getUpdated" value="Long getUpdated" dir="${project.build.directory}/generated-sources/openapi/src/main/java/opencode/sdk/model">
+                                    <include name="*.java"/>
+                                </replace>
+                                <replace token="Integer getInitialized" value="Long getInitialized" dir="${project.build.directory}/generated-sources/openapi/src/main/java/opencode/sdk/model">
+                                    <include name="*.java"/>
+                                </replace>
+                                <replace token="Integer getCompacting" value="Long getCompacting" dir="${project.build.directory}/generated-sources/openapi/src/main/java/opencode/sdk/model">
+                                    <include name="*.java"/>
+                                </replace>
+                                <replace token="Integer getArchived" value="Long getArchived" dir="${project.build.directory}/generated-sources/openapi/src/main/java/opencode/sdk/model">
+                                    <include name="*.java"/>
+                                </replace>
+                                <replace token="Integer setCreated" value="Long setCreated" dir="${project.build.directory}/generated-sources/openapi/src/main/java/opencode/sdk/model">
+                                    <include name="*.java"/>
+                                </replace>
+                                <replace token="Integer setUpdated" value="Long setUpdated" dir="${project.build.directory}/generated-sources/openapi/src/main/java/opencode/sdk/model">
+                                    <include name="*.java"/>
+                                </replace>
+                                <replace token="Integer setInitialized" value="Long setInitialized" dir="${project.build.directory}/generated-sources/openapi/src/main/java/opencode/sdk/model">
+                                    <include name="*.java"/>
+                                </replace>
+                                <replace token="Integer setCompacting" value="Long setCompacting" dir="${project.build.directory}/generated-sources/openapi/src/main/java/opencode/sdk/model">
+                                    <include name="*.java"/>
+                                </replace>
+                                <replace token="Integer setArchived" value="Long setArchived" dir="${project.build.directory}/generated-sources/openapi/src/main/java/opencode/sdk/model">
+                                    <include name="*.java"/>
+                                </replace>
+                                <echo message="Timestamp field fixes applied"/>
+
                                 <!-- Delete generated test sources that the generator creates
                                      despite generateModelTests=false and generateApiTests=false -->
                                 <delete dir="${project.build.directory}/generated-sources/openapi/src/test"/>
