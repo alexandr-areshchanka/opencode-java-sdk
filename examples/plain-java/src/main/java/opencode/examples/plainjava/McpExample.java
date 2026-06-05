@@ -94,7 +94,7 @@ public class McpExample {
         localConfig.setType(McpLocalConfig.TypeEnum.LOCAL);
         localConfig.setCommand(Arrays.asList("node", "mcp-server.js"));
         localConfig.setEnabled(true);
-        localConfig.setTimeout(5000);
+        localConfig.setTimeout(5000L);
 
         // Create the request config wrapper
         McpAddRequestConfig config = new McpAddRequestConfig(localConfig);

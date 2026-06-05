@@ -57,7 +57,14 @@ public class SessionAdvancedExample {
             unshareSession(sessionId);
 
             // Demonstrate session summarization
-            summarizeSession(sessionId);
+            // Note: summarization requires a session with messages; an empty session
+            // may return a server error, so we catch and continue gracefully.
+            try {
+                summarizeSession(sessionId);
+            } catch (ApiException e) {
+                logger.warn("Session summarization failed (expected for empty session): {} - {}",
+                        e.getCode(), e.getMessage());
+            }
 
             // Demonstrate session abort
             abortSession(sessionId);
