@@ -18,6 +18,8 @@ This directory contains the Docker configuration for running OpenCode server wit
    docker-compose up --build
    ```
 
+   The Docker image is pinned to a specific OpenCode version via the `OPENCODE_VERSION` build arg. By default, it reads from `docker-compose.yml` which mirrors the version in [`.opencode-version`](../../.opencode-version) at the project root. To change the target version, edit `.opencode-version` and rebuild.
+
 4. **Verify OpenCode server is running:**
    ```bash
    curl http://localhost:4096/global/health
@@ -46,8 +48,11 @@ Pass variables directly to docker-compose:
 Z_AI_API_KEY=your_key_here \
 OPENCODE_SERVER_USERNAME=admin \
 OPENCODE_SERVER_PASSWORD=secret \
+OPENCODE_VERSION=1.17.1 \
 docker-compose up --build
 ```
+
+Override `OPENCODE_VERSION` to build with a different OpenCode version. The default is read from the project root [`.opencode-version`](../../.opencode-version) file.
 
 ### Method 3: Docker Run
 
@@ -58,7 +63,7 @@ docker run -p 4096:4096 \
   -e Z_AI_API_KEY=your_key_here \
   -e OPENCODE_SERVER_USERNAME=admin \
   -e OPENCODE_SERVER_PASSWORD=secret \
-  opencode-server:latest
+  opencode-server:${OPENCODE_VERSION}
 ```
 
 ## Environment Variables
@@ -73,19 +78,46 @@ These variables **MUST** be provided at runtime. The container will fail to star
 | `OPENCODE_SERVER_USERNAME` | Username for HTTP basic authentication | `opencode` |
 | `OPENCODE_SERVER_PASSWORD` | Password for HTTP basic authentication | `opencode123` |
 
+### Build Arguments
+
+| Variable | Description | Source |
+|----------|-------------|--------|
+| `OPENCODE_VERSION` | OpenCode server version to install | [`.opencode-version`](../../.opencode-version) |
+
+The Dockerfile installs the exact version specified by `OPENCODE_VERSION` and verifies the installed version matches. If there is a mismatch, the build fails.
+
 ### Optional Variables
 
 | Variable | Description | Default |
-|----------|-------------|---------|
+|----------|-------------|--------|
 | `COMPOSE_PROJECT_NAME` | Docker Compose project name | `opencode-sdk` |
 
 ### Files
 
-- `Dockerfile`: Main container definition
+- `Dockerfile`: Container definition with version-pinned OpenCode install and verification
 - `config/opencode.json.template`: Template for OpenCode configuration with Z.AI provider
 - `config/auth.json.template`: Template for authentication configuration
 - `start.sh`: Startup script with environment variable handling
 - `.env.opencode.example`: Example environment file with all required variables
+
+### Version Management
+
+The OpenCode version is pinned via the `OPENCODE_VERSION` build arg:
+
+1. The project root [`.opencode-version`](../../.opencode-version) file is the single source of truth
+2. `docker-compose.yml` passes `OPENCODE_VERSION` as a build arg (defaults to the value in the compose file)
+3. The `Dockerfile` installs that exact version and verifies it matches
+
+To change the target OpenCode version:
+
+```bash
+# Edit .opencode-version at the project root
+echo "1.18.0" > ../../.opencode-version
+
+# Update the default in docker-compose.yml to match
+# Then rebuild
+docker-compose up --build
+```
 
 ## Z.AI Provider Configuration
 

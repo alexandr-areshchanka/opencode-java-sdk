@@ -1,14 +1,25 @@
 # OpenCode Server Dockerfile with Z.AI Provider Configuration
 FROM node:24-alpine
 
+# OpenCode version to install (override with --build-arg OPENCODE_VERSION=x.y.z)
+ARG OPENCODE_VERSION
+
 # Install required packages
 RUN apk add --no-cache curl gettext bash
 
 # Set working directory
 WORKDIR /app
 
-# Install OpenCode using the official install script
-RUN curl -fsSL https://opencode.ai/install | bash
+# Install OpenCode using the official install script with pinned version
+RUN curl -fsSL https://opencode.ai/install | bash -s -- --version ${OPENCODE_VERSION}
+
+# Verify installed version matches the requested version
+RUN INSTALLED_VERSION=$(/root/.opencode/bin/opencode --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1) && \
+    if [ "$INSTALLED_VERSION" != "${OPENCODE_VERSION}" ]; then \
+        echo "ERROR: Version mismatch - expected ${OPENCODE_VERSION}, got ${INSTALLED_VERSION}"; \
+        exit 1; \
+    fi && \
+    echo "OpenCode ${INSTALLED_VERSION} installed successfully"
 
 # Add OpenCode to PATH
 ENV PATH="/root/.opencode/bin:$PATH"

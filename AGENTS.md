@@ -95,6 +95,18 @@ flowchart TB
 - Use SLF4J for logging, not System.out
 - Validate inputs at method boundaries
 
+## Version Management
+
+The file `.opencode-version` (at project root) is the single source of truth for the OpenCode server version — similar to `.nvmrc`, `.ruby-version`, or `.tool-versions`. All Docker builds and release scripts read this file to determine which version to install.
+
+```bash
+# Check current pinned version
+cat .opencode-version
+
+# Change target version (then rebuild Docker)
+echo "1.18.0" > .opencode-version
+```
+
 ## Build Commands
 
 ```bash
@@ -120,6 +132,8 @@ mvn dependency:tree
 cd examples/plain-java && mvn clean package
 cd examples/spring-boot && mvn clean package
 ```
+
+Docker builds are pinned to the version in `.opencode-version` via the `OPENCODE_VERSION` build arg, ensuring reproducible builds.
 
 ## OpenAPI Reference
 
@@ -194,11 +208,31 @@ See [`examples/spring-boot/AGENTS.md`](examples/spring-boot/AGENTS.md) for compl
 
 ## Release Scripts
 
-The project includes release automation scripts:
+The project includes version-aware release automation scripts:
 - `release.bat` - Windows release script
 - `release.sh` - Linux/macOS release script
 
-These scripts automate: Docker rebuild → OpenAPI spec download → version extraction → POM updates → SDK rebuild.
+### Release Flow
+
+1. Edit `.opencode-version` to set the target version (or pass it as an argument: `./release.sh [version]`)
+2. Run the release script
+3. The script executes these steps:
+   - **Docker build** — Rebuilds the Docker image pinned to the exact version from `.opencode-version`
+   - **Version verification** — Confirms the installed OpenCode version matches the target (aborts on mismatch)
+   - **Strip SNAPSHOT** — Removes `-SNAPSHOT` from all `pom.xml` `<revision>` properties
+   - **Build SDK** — Runs `mvn clean install`
+   - **Integration tests** — Mandatory gate; the release aborts and rolls back if tests fail
+   - **Git tag** — Commits the clean version and creates a `vX.Y.Z` tag
+   - **Bump SNAPSHOT** — Increments `.opencode-version` to the next patch version and sets all POMs to `X.Y.Z-SNAPSHOT`
+   - **Commit SNAPSHOT** — Commits the bumped version
+4. After a successful release, push manually: `git push && git push --tags`
+
+### Key Properties
+- **Single source of truth**: `.opencode-version` determines the OpenCode version everywhere
+- **Reproducible Docker builds**: Pinned to exact version via `OPENCODE_VERSION` build arg
+- **Integration tests are a mandatory gate**: Release cannot proceed without passing tests
+- **Idempotent**: Safe to re-run if a step fails mid-way
+- **SNAPSHOT management**: After release, the version is bumped to the next patch `-SNAPSHOT` for continued development
 
 ## Docker Infrastructure
 
@@ -207,6 +241,8 @@ The `docker/opencode/` directory contains the OpenCode server setup:
 - **Health**: `GET /global/health`
 - **Authentication**: HTTP Basic Auth (default: opencode/opencode123)
 - **Provider**: Z.AI with GLM-4.7 model
+- **Version pinning**: Docker builds use `OPENCODE_VERSION` build arg, sourced from `.opencode-version`
+- **Version verification**: The Dockerfile verifies the installed version matches `OPENCODE_VERSION` and fails on mismatch
 
 See `docker/opencode/README.md` for setup instructions.
 

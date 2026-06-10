@@ -3,11 +3,12 @@
   <parent>
     <artifactId>opencode-examples</artifactId>
     <groupId>io.opencode</groupId>
-    <version>${revision}</version>
+    <version>1.15.12-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>opencode-examples-plain-java</artifactId>
   <name>OpenCode Plain Java Example</name>
+  <version>1.15.12-SNAPSHOT</version>
   <description>Plain Java example demonstrating SDK usage</description>
   <build>
     <plugins>

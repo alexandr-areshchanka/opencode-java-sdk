@@ -42,18 +42,29 @@ flowchart TB
 - **File**: `docker-compose.yml`
 - **Service**: `opencode-server`
 - **Network**: `opencode-sdk` (bridge)
+- **Version Pinning**: `OPENCODE_VERSION` build arg sourced from project root `.opencode-version`
 
 ### Configuration Files
 
 | File | Purpose |
 |------|---------|
-| `Dockerfile` | Container definition |
+| `Dockerfile` | Container definition with version-pinned install and verification |
 | `config/opencode.json.template` | Template for OpenCode server configuration |
 | `config/auth.json.template` | Template for authentication configuration |
 | `start.sh` | Startup script with environment variable handling and template processing |
 | `.env.opencode` | Environment variables for Docker Compose |
 | `.env.opencode.example` | Example environment file with all required variables |
-|
+
+### Version Pinning
+
+The Docker image installs a specific OpenCode version (not latest):
+
+1. **Source of truth**: [`.opencode-version`](../../.opencode-version) at the project root
+2. **Build arg**: `OPENCODE_VERSION` is passed to the Dockerfile via `docker-compose.yml`
+3. **Verification**: The Dockerfile verifies the installed version matches `OPENCODE_VERSION` and fails the build on mismatch
+4. **Reproducibility**: The same `.opencode-version` always produces the same Docker image
+
+To change the target version, edit `.opencode-version` at the project root and rebuild.
 
 ## Default Configuration
 
@@ -81,8 +92,11 @@ flowchart TB
 # Start services
 docker-compose up -d
 
-# Build and start
+# Build and start (pinned to version from .opencode-version)
 docker-compose up --build -d
+
+# Build with a specific version override
+OPENCODE_VERSION=1.18.0 docker-compose up --build -d
 
 # View logs
 docker-compose logs -f opencode-server
@@ -108,6 +122,12 @@ open http://localhost:4096/doc
 | `OPENCODE_SERVER_USERNAME` | HTTP Basic Auth username | opencode |
 | `OPENCODE_SERVER_PASSWORD` | HTTP Basic Auth password | opencode123 |
 | `Z_AI_API_KEY` | Z.AI API key | (pre-configured) |
+
+### Build Arguments
+
+| Argument | Description | Source |
+|----------|-------------|--------|
+| `OPENCODE_VERSION` | OpenCode server version to install | [`.opencode-version`](../../.opencode-version) |
 
 ## Directory Structure
 

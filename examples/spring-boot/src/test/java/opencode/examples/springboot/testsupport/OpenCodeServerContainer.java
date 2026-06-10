@@ -18,7 +18,8 @@ public class OpenCodeServerContainer extends GenericContainer<OpenCodeServerCont
     private static final int OPENCODE_PORT = 4096;
     private static final String DEFAULT_USERNAME = "opencode";
     private static final String DEFAULT_PASSWORD = "opencode123";
-    private static final String IMAGE_NAME = "opencode-server:test";
+    private static final String OPENCODE_VERSION = System.getProperty("opencode.version", "1.17.1");
+    private static final String IMAGE_NAME = "opencode-server:" + OPENCODE_VERSION;
 
     public OpenCodeServerContainer() {
         super(validateImage());

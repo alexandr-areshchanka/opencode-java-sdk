@@ -22,6 +22,7 @@
 
     <properties>
         <revision>1.15.12-SNAPSHOT</revision>
+        <opencode.version>1.17.1</opencode.version>
         <java.version>21</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -196,10 +197,13 @@
                             <skip>false</skip>
                             <images>
                                 <image>
-                                    <name>opencode-server:test</name>
+                                    <name>opencode-server:${opencode.version}</name>
                                     <build>
                                         <dockerFile>${project.basedir}/../../docker/opencode/Dockerfile</dockerFile>
                                         <contextDir>${project.basedir}/../../docker/opencode</contextDir>
+                                        <buildArgs>
+                                            <OPENCODE_VERSION>${opencode.version}</OPENCODE_VERSION>
+                                        </buildArgs>
                                     </build>
                                 </image>
                             </images>
