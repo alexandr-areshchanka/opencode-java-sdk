@@ -11,7 +11,22 @@ import opencode.sdk.model.GlobalEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Base64;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 public class EventStreamingExample {
 
@@ -20,14 +35,19 @@ public class EventStreamingExample {
     private final EventApi eventApi;
     private final GlobalApi globalApi;
     private final ResponseValidator validator;
+    private final ApiClient apiClient;
+
+    private static final long SSE_COLLECTION_DURATION_SECONDS = 5;
 
     public EventStreamingExample(ApiClient apiClient) {
+        this.apiClient = apiClient;
         this.eventApi = new EventApi(apiClient);
         this.globalApi = new GlobalApi(apiClient);
         this.validator = null;
     }
 
     public EventStreamingExample(ExampleContext context) {
+        this.apiClient = context.getApiClient();
         this.eventApi = new EventApi(context.getApiClient());
         this.globalApi = new GlobalApi(context.getApiClient());
         this.validator = context.getValidator();
@@ -39,8 +59,7 @@ public class EventStreamingExample {
 
             // Skip SSE streaming in automated testing (long-running/blocking operations)
             if (validator != null) {
-                logger.info("Skipping SSE event streaming in automated testing (blocking operations)");
-                logger.info("SSE endpoints tested: eventSubscribe, globalEvent");
+                demonstrateAsyncEventStreaming();
             } else {
                 // Demonstrate project event subscription
                 demonstrateProjectEventSubscribe();
@@ -55,6 +74,112 @@ public class EventStreamingExample {
             logger.error("API Error during event streaming operations: {} - {}", e.getCode(), e.getMessage(), e);
         } catch (Exception e) {
             logger.error("Unexpected error during event streaming operations: {}", e.getMessage(), e);
+        }
+    }
+
+    private void demonstrateAsyncEventStreaming() {
+        logger.info("Running async SSE event streaming in testing mode");
+
+        String sseUrl = apiClient.getBaseUri() + "/global/event";
+
+        HttpClient httpClient = HttpClient.newBuilder()
+                .connectTimeout(Duration.ofSeconds(10))
+                .build();
+
+        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
+                .uri(URI.create(sseUrl))
+                .header("Accept", "text/event-stream")
+                .GET();
+
+        Consumer<HttpRequest.Builder> interceptor = apiClient.getRequestInterceptor();
+        if (interceptor != null) {
+            interceptor.accept(requestBuilder);
+        }
+
+        HttpRequest request = requestBuilder.build();
+
+        CountDownLatch connectedLatch = new CountDownLatch(1);
+        CountDownLatch firstEventLatch = new CountDownLatch(1);
+        AtomicInteger eventCount = new AtomicInteger(0);
+        AtomicBoolean running = new AtomicBoolean(true);
+        final InputStream[] streamHolder = new InputStream[1];
+
+        Thread sseThread = new Thread(() -> {
+            try {
+                HttpResponse<InputStream> response = httpClient.send(
+                        request, HttpResponse.BodyHandlers.ofInputStream());
+                streamHolder[0] = response.body();
+                connectedLatch.countDown();
+
+                BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(streamHolder[0], StandardCharsets.UTF_8));
+                String line;
+                while (running.get() && (line = reader.readLine()) != null) {
+                    if (line.startsWith("data:")) {
+                        int count = eventCount.incrementAndGet();
+                        String data = line.substring(5).trim();
+                        logger.info("SSE event #{}: {}", count, data);
+                        firstEventLatch.countDown();
+                    }
+                }
+            } catch (IOException e) {
+                if (running.get()) {
+                    logger.warn("SSE stream I/O error: {}", e.getMessage());
+                }
+            } catch (Exception e) {
+                if (running.get()) {
+                    logger.warn("SSE stream error: {}", e.getMessage());
+                }
+            }
+        }, "sse-event-reader");
+        sseThread.setDaemon(true);
+        sseThread.start();
+
+        try {
+            boolean connected = connectedLatch.await(10, TimeUnit.SECONDS);
+            if (!connected) {
+                logger.error("Failed to connect to SSE endpoint within timeout");
+                running.set(false);
+                sseThread.interrupt();
+                return;
+            }
+            logger.info("Connected to SSE endpoint: {}", sseUrl);
+
+            boolean receivedFirst = firstEventLatch.await(
+                    SSE_COLLECTION_DURATION_SECONDS, TimeUnit.SECONDS);
+
+            running.set(false);
+
+            InputStream is = streamHolder[0];
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException ignored) {
+                }
+            }
+
+            sseThread.join(1000);
+
+            int totalEvents = eventCount.get();
+            logger.info("SSE event collection completed: {} events received in {} seconds",
+                    totalEvents, SSE_COLLECTION_DURATION_SECONDS);
+
+            if (receivedFirst) {
+                validator.validateNonNull("SSE events received", "SSE event stream");
+            } else {
+                logger.warn("No SSE events received within {} second timeout - "
+                        + "server may not be generating events", SSE_COLLECTION_DURATION_SECONDS);
+                validator.validateNonNull(null, "SSE event stream");
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            running.set(false);
+            InputStream is = streamHolder[0];
+            if (is != null) {
+                try { is.close(); } catch (IOException ignored) {}
+            }
+            sseThread.interrupt();
+            logger.warn("SSE collection interrupted");
         }
     }
 

@@ -16,8 +16,6 @@
 #
 # Note: The .env.opencode file is loaded via env_file. Do not commit sensitive values to git.
 
-version: '3.8'
-
 services:
   opencode-server:
     build:

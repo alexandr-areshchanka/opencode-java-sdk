@@ -7,6 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Base64;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class Main {
 
@@ -22,6 +24,25 @@ public class Main {
         String credentials = "opencode:opencode123";
         String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
         apiClient.setRequestInterceptor(builder -> builder.header("Authorization", "Basic " + encoded));
+
+        // Launch EventStreamingExample in background thread (SSE is long-running)
+        AtomicBoolean sseRunning = new AtomicBoolean(true);
+        AtomicReference<String> sseResult = new AtomicReference<>("<no result>");
+        Thread eventStreamingThread = new Thread(() -> {
+            try {
+                EventStreamingExample eventStreamingExample = new EventStreamingExample(apiClient);
+                eventStreamingExample.demonstrateEventStreaming();
+                sseResult.set("completed");
+            } catch (Exception e) {
+                sseResult.set("error: " + e.getMessage());
+                if (sseRunning.get()) {
+                    logger.warn("EventStreamingExample error: {}", e.getMessage());
+                }
+            }
+        }, "event-streaming-background");
+        eventStreamingThread.setDaemon(true);
+        eventStreamingThread.start();
+        logger.info("EventStreamingExample started in background thread");
 
         try {
             // First, verify connection with health check
@@ -119,12 +140,6 @@ public class Main {
             VcsExample vcsExample = new VcsExample(apiClient);
             vcsExample.demonstrateVcsOperations();
 
-            // Run Event Streaming Example
-            logger.info("\n");
-            logger.info("========================================");
-            EventStreamingExample eventStreamingExample = new EventStreamingExample(apiClient);
-            eventStreamingExample.demonstrateEventStreaming();
-
             // Run PTY Example
             logger.info("\n");
             logger.info("========================================");
@@ -138,6 +153,15 @@ public class Main {
         } catch (Exception e) {
             logger.error("Error running examples: {}", e.getMessage(), e);
             System.exit(1);
+        } finally {
+            sseRunning.set(false);
+            eventStreamingThread.interrupt();
+            try {
+                eventStreamingThread.join(2000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            logger.info("EventStreamingExample background thread finished: {}", sseResult.get());
         }
     }
 

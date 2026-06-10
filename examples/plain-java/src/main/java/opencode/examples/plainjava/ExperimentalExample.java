@@ -48,10 +48,10 @@ public class ExperimentalExample {
             // List workspaces
             listWorkspaces();
 
-            // Create a workspace
-            Workspace createdWorkspace = createWorkspace("example-workspace");
+            // Create a workspace (may fail if server lacks the workspace adapter plugin)
+            createWorkspace("example-workspace");
 
-            // List workspaces again to show the new one
+            // List workspaces again
             listWorkspaces();
 
             // List MCP resources
@@ -120,25 +120,34 @@ public class ExperimentalExample {
         }
     }
 
-    private Workspace createWorkspace(String name) throws ApiException {
+    private static final String DEFAULT_WORKSPACE_ADAPTER = "git";
+    private static final String DEFAULT_BRANCH = "main";
+
+    private Workspace createWorkspace(String name) {
         logger.info("\n--- Creating Workspace: {} ---", name);
 
         ExperimentalWorkspaceCreateRequest request = new ExperimentalWorkspaceCreateRequest();
-        request.setType("git");
-        request.setBranch("main");
+        request.setType(DEFAULT_WORKSPACE_ADAPTER);
+        request.setBranch(DEFAULT_BRANCH);
 
-        Workspace workspace = workspaceApi.experimentalWorkspaceCreate(
-                null,  // directory
-                null,  // workspace
-                request
-        );
+        try {
+            Workspace workspace = workspaceApi.experimentalWorkspaceCreate(
+                    null,  // directory
+                    null,  // workspace
+                    request
+            );
 
-        logger.info("Workspace created successfully:");
-        logger.info("  ID: {}", workspace.getId());
-        logger.info("  Name: {}", workspace.getName());
-        logger.info("  Type: {}", workspace.getType());
+            logger.info("Workspace created successfully:");
+            logger.info("  ID: {}", workspace.getId());
+            logger.info("  Name: {}", workspace.getName());
+            logger.info("  Type: {}", workspace.getType());
 
-        return workspace;
+            return workspace;
+        } catch (ApiException e) {
+            // Workspace adapters are plugin-registered; the server may not support the requested adapter type
+            logger.warn("Workspace creation skipped: {}", e.getMessage());
+            return null;
+        }
     }
 
     private void listMcpResources() throws ApiException {

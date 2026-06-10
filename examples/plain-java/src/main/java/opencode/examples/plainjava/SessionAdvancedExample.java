@@ -69,8 +69,11 @@ public class SessionAdvancedExample {
             // Demonstrate session abort
             abortSession(sessionId);
 
+            // Send a prompt so the session has messages (revert requires a real message ID)
+            String messageId = sendPromptAndGetMessageId(sessionId, "What is Java?");
+
             // Demonstrate session revert
-            revertSession(sessionId);
+            revertSession(sessionId, messageId);
 
             // Demonstrate session unrevert
             unrevertSession(sessionId);
@@ -237,11 +240,46 @@ public class SessionAdvancedExample {
         }
     }
 
-    private void revertSession(String sessionId) throws ApiException {
-        logger.info("\n--- Reverting Session: {} ---", sessionId);
+    private String sendPromptAndGetMessageId(String sessionId, String text) throws ApiException {
+        logger.info("\n--- Sending Prompt for Revert Demo ---");
+
+        TextPartInput textPart = new TextPartInput();
+        textPart.setType(TextPartInput.TypeEnum.TEXT);
+        textPart.setText(text);
+
+        SessionPromptRequest promptRequest = new SessionPromptRequest();
+        promptRequest.addPartsItem(new SessionPromptRequestPartsInner(textPart));
+
+        SessionPrompt200Response response = sessionApi.sessionPrompt(
+                sessionId, null, null, promptRequest
+        );
+
+        // Retrieve the user message ID from the session's message list
+        List<SessionMessages200ResponseInner> messages = sessionApi.sessionMessages(
+                sessionId, null, null, 10, null
+        );
+
+        if (validator != null) {
+            validator.validateCollection(messages, "messages after prompt");
+        }
+
+        // Find the first user message (its ID starts with "msg")
+        for (SessionMessages200ResponseInner msg : messages) {
+            Message info = msg.getInfo();
+            if (info != null && info.getActualInstance() instanceof UserMessage userMsg) {
+                logger.info("Found user message with ID: {}", userMsg.getId());
+                return userMsg.getId();
+            }
+        }
+
+        throw new ApiException("No user message found in session — cannot revert");
+    }
+
+    private void revertSession(String sessionId, String messageId) throws ApiException {
+        logger.info("\n--- Reverting Session: {} to message {} ---", sessionId, messageId);
 
         SessionRevertRequest request = new SessionRevertRequest();
-        request.setMessageID("message-id-to-revert-to");
+        request.setMessageID(messageId);
         request.setPartID(null);
 
         Session session = sessionApi.sessionRevert(
