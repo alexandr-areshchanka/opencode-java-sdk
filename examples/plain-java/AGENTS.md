@@ -127,7 +127,7 @@ mvn exec:java -Dexec.mainClass="opencode.examples.plainjava.Main"
 ## Code Style
 
 - NO Lombok - explicit getters/setters only
-- Plain Java 21 features
+- Plain Java 25 features
 - SLF4J for logging
 - Each example is self-contained
 - `testing/` package provides a lightweight test harness for running examples with cleanup, validation, and result reporting

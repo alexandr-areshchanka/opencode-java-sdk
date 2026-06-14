@@ -423,6 +423,6 @@ Reference the OpenAPI specification at `sdk/openapi.json` for:
 
 ## Version Compatibility
 
-- Java 21+
+- Java 25+
 - No Lombok dependency
 - Compatible with any Java project (no framework dependencies beyond Jackson and SLF4J)

@@ -10,7 +10,7 @@ Integration tests use Testcontainers to spin up an OpenCode server in a Docker c
 
 - Docker installed and running
 - Maven 3.x
-- Java 21
+- Java 25
 - Z_AI_API_KEY environment variable set (or default will be used)
 
 ## Quick Start

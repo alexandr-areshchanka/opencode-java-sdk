@@ -76,7 +76,7 @@ flowchart TB
 ## Code Style Guidelines
 
 ### General
-- Use Java 21 features where appropriate
+- Use Java 25 features where appropriate
 - UTF-8 encoding for all source files
 - Base package: `opencode` across all modules
 

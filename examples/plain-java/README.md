@@ -6,7 +6,7 @@ This module demonstrates how to use the OpenCode Java SDK in a plain Java applic
 
 Before running the examples, ensure you have:
 
-1. **Java 21** or higher installed
+1. **Java 25** or higher installed
 2. **Maven 3.x** installed
 3. **OpenCode Server** running on port 4096
 
@@ -187,7 +187,7 @@ mvn clean install
 Then retry building the examples.
 
 **Java version mismatch:**
-Ensure you're using Java 21:
+Ensure you're using Java 25:
 ```bash
 java -version
 ```
