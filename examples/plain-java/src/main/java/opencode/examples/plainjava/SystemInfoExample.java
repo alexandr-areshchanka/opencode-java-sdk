@@ -4,7 +4,6 @@ import opencode.examples.plainjava.testing.ExampleContext;
 import opencode.examples.plainjava.testing.ResponseValidator;
 import opencode.sdk.api.GlobalApi;
 import opencode.sdk.api.InstanceApi;
-import opencode.sdk.invoker.ApiClient;
 import opencode.sdk.invoker.ApiException;
 import opencode.sdk.model.Agent;
 import opencode.sdk.model.AppSkills200ResponseInner;
@@ -13,7 +12,6 @@ import opencode.sdk.model.GlobalHealth200Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Base64;
 import java.util.List;
 
 public class SystemInfoExample {
@@ -23,12 +21,6 @@ public class SystemInfoExample {
     private final GlobalApi globalApi;
     private final InstanceApi instanceApi;
     private final ResponseValidator validator;
-
-    public SystemInfoExample(ApiClient apiClient) {
-        this.globalApi = new GlobalApi(apiClient);
-        this.instanceApi = new InstanceApi(apiClient);
-        this.validator = null;
-    }
 
     public SystemInfoExample(ExampleContext context) {
         this.globalApi = new GlobalApi(context.getApiClient());
@@ -162,30 +154,4 @@ public class SystemInfoExample {
         }
     }
 
-    public static void main(String[] args) {
-        logger.info("Starting System Info Example");
-        logger.info("============================");
-
-        // Configure the client with Basic Auth
-        ApiClient apiClient = new ApiClient();
-        apiClient.updateBaseUri("http://localhost:4096");
-        String credentials = "opencode:opencode123";
-        String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
-        apiClient.setRequestInterceptor(builder -> builder.header("Authorization", "Basic " + encoded));
-
-        try {
-            // Run the example
-            SystemInfoExample example = new SystemInfoExample(apiClient);
-            example.demonstrateSystemInfo();
-
-            logger.info("\n");
-            logger.info("============================");
-            logger.info("Example completed successfully!");
-
-        } catch (Exception e) {
-            logger.error("Error running example: {}", e.getMessage(), e);
-            System.err.println("Fatal error: " + e.getMessage());
-            System.exit(1);
-        }
-    }
 }

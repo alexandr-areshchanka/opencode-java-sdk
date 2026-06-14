@@ -4,7 +4,6 @@ import opencode.examples.plainjava.testing.ExampleContext;
 import opencode.examples.plainjava.testing.ResponseValidator;
 import opencode.sdk.api.ExperimentalApi;
 import opencode.sdk.api.WorkspaceApi;
-import opencode.sdk.invoker.ApiClient;
 import opencode.sdk.invoker.ApiException;
 import opencode.sdk.model.ExperimentalWorkspaceCreateRequest;
 import opencode.sdk.model.GlobalSession;
@@ -14,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
-import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
@@ -25,12 +23,6 @@ public class ExperimentalExample {
     private final ExperimentalApi experimentalApi;
     private final WorkspaceApi workspaceApi;
     private final ResponseValidator validator;
-
-    public ExperimentalExample(ApiClient apiClient) {
-        this.experimentalApi = new ExperimentalApi(apiClient);
-        this.workspaceApi = new WorkspaceApi(apiClient);
-        this.validator = null;
-    }
 
     public ExperimentalExample(ExampleContext context) {
         this.experimentalApi = new ExperimentalApi(context.getApiClient());
@@ -168,22 +160,4 @@ public class ExperimentalExample {
         }
     }
 
-    public static void main(String[] args) {
-        try {
-            // Create client configuration
-            ApiClient apiClient = new ApiClient();
-            apiClient.updateBaseUri("http://localhost:4096");
-            String credentials = "opencode:opencode123";
-            String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
-            apiClient.setRequestInterceptor(builder -> builder.header("Authorization", "Basic " + encoded));
-
-            // Run the example
-            ExperimentalExample example = new ExperimentalExample(apiClient);
-            example.demonstrateExperimentalApis();
-
-        } catch (Exception e) {
-            System.err.println("Fatal error: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
 }

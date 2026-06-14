@@ -5,14 +5,12 @@ import opencode.examples.plainjava.testing.ResponseValidator;
 import opencode.sdk.api.ExperimentalApi;
 import opencode.sdk.api.PermissionApi;
 import opencode.sdk.api.QuestionApi;
-import opencode.sdk.invoker.ApiClient;
 import opencode.sdk.invoker.ApiException;
 import opencode.sdk.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 
 public class InteractiveExample {
@@ -23,13 +21,6 @@ public class InteractiveExample {
     private final QuestionApi questionApi;
     private final PermissionApi permissionApi;
     private final ResponseValidator validator;
-
-    public InteractiveExample(ApiClient apiClient) {
-        this.experimentalApi = new ExperimentalApi(apiClient);
-        this.questionApi = new QuestionApi(apiClient);
-        this.permissionApi = new PermissionApi(apiClient);
-        this.validator = null;
-    }
 
     public InteractiveExample(ExampleContext context) {
         this.experimentalApi = new ExperimentalApi(context.getApiClient());
@@ -211,27 +202,4 @@ public class InteractiveExample {
         }
     }
 
-    public static void main(String[] args) {
-        logger.info("Starting Interactive Example");
-        logger.info("============================");
-
-        ApiClient apiClient = new ApiClient();
-        apiClient.updateBaseUri("http://localhost:4096");
-        String credentials = "opencode:opencode123";
-        String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
-        apiClient.setRequestInterceptor(builder -> builder.header("Authorization", "Basic " + encoded));
-
-        try {
-            InteractiveExample example = new InteractiveExample(apiClient);
-            example.demonstrateInteractiveApis();
-
-            logger.info("\n============================");
-            logger.info("Interactive Example completed!");
-
-        } catch (Exception e) {
-            System.err.println("Fatal error running Interactive Example: " + e.getMessage());
-            e.printStackTrace();
-            System.exit(1);
-        }
-    }
 }

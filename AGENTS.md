@@ -13,7 +13,7 @@ The SDK connects to an OpenCode server running via Docker (default port 4096) to
 ```mermaid
 flowchart TB
     subgraph "OpenCode Java SDK"
-        ROOT["opencode-java-dsk<br/>Parent POM"]
+        ROOT["opencode-java-sdk<br/>Parent POM"]
     end
 
     subgraph "Core Modules"
@@ -66,7 +66,7 @@ flowchart TB
 
 | Module | Artifact ID | Packaging | Description |
 |--------|-------------|-----------|-------------|
-| Root | `opencode-java-dsk` | `pom` | Parent aggregator POM |
+| Root | `opencode-java-sdk` | `pom` | Parent aggregator POM |
 | SDK | `opencode-sdk` | `jar` | Core HTTP client library |
 | Starter | `opencode-spring-boot-starter` | `jar` | Spring Boot auto-configuration |
 | Examples | `opencode-examples` | `pom` | Examples parent POM |
@@ -91,7 +91,7 @@ flowchart TB
 - Keep classes focused on single responsibility
 
 ### Error Handling
-- Extend `OpenCodeException` for custom SDK exceptions
+- Throw `RuntimeException` / `IllegalStateException` for unrecoverable errors — the hand-written code uses raw `RuntimeException` (there is no custom SDK exception base class)
 - Use SLF4J for logging, not System.out
 - Validate inputs at method boundaries
 
@@ -147,8 +147,8 @@ The OpenCode server API specification is available at:
 The SDK is now auto-generated from OpenAPI specification and includes:
 
 **API Classes** (`opencode.sdk.api`)
-- `DefaultApi` - Main API class with 50+ endpoint methods (agents, auth, commands, config, events, files, search, sessions, etc.)
-- `SessionApi` - Session-specific operations (sessionChildren, sessionGet)
+- 22 generated API classes — one per OpenAPI tag/area (there is no single monolithic entry point). Representative classes: `SessionApi`, `GlobalApi`, `ConfigApi`, `EventApi`, `FileApi`, `McpApi`, `ProviderApi`, `PtyApi`, `SyncApi`, `TuiApi`, `V2Api`, `V2MessagesApi`, `V2ModelsApi`, `V2ProvidersApi`, `WorkspaceApi`, `InstanceApi`, `ControlApi`, `ExperimentalApi`, `PermissionApi`, `ProjectApi`, `QuestionApi`, `PtyWsApi`
+- Each API class is constructed with an `ApiClient` and exposes the endpoint methods for its area
 
 **Infrastructure** (`opencode.sdk.invoker`)
 - `ApiClient` - Base HTTP client for all API calls
@@ -165,7 +165,7 @@ The SDK is now auto-generated from OpenAPI specification and includes:
 - 150+ auto-generated model classes for requests, responses, and data structures
 - `ApiResponse` - Response model (original, in model package)
 
-**Note:** The SDK uses OpenAPI Generator (v7.21.0) to auto-generate classes in `api/`, `invoker/`, and `model/` packages from the OpenAPI specification. These generated classes should not be manually edited. Custom implementations should go in `client/`, `config/`, and `model/` packages.
+**Note:** The SDK uses OpenAPI Generator (v7.22.0) to auto-generate classes in `api/`, `invoker/`, and `model/` packages from the OpenAPI specification. These generated classes should not be manually edited. Custom implementations should go in `client/`, `config/`, and `model/` packages.
 
 #### OpenAPI Generator Build Pipeline
 
@@ -202,7 +202,7 @@ The Spring Boot example implements complete API coverage with 17 REST controller
 | Dev Tools | DevToolsController, ExperimentalController |
 | Instance & Interactive | InstanceController, InteractiveController |
 | MCP & Extensions | McpController, TodoController, VcsController |
-| Real-time | EventStreamingController (SSE), PtyController |
+| Real-time | EventStreamingController (JSON), PtyController |
 
 See [`examples/spring-boot/AGENTS.md`](examples/spring-boot/AGENTS.md) for complete documentation.
 

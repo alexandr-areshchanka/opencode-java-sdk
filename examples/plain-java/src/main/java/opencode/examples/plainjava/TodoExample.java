@@ -3,14 +3,12 @@ package opencode.examples.plainjava;
 import opencode.examples.plainjava.testing.ExampleContext;
 import opencode.examples.plainjava.testing.ResponseValidator;
 import opencode.sdk.api.SessionApi;
-import opencode.sdk.invoker.ApiClient;
 import opencode.sdk.invoker.ApiException;
 import opencode.sdk.model.Session;
 import opencode.sdk.model.Todo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Base64;
 import java.util.List;
 
 public class TodoExample {
@@ -19,11 +17,6 @@ public class TodoExample {
 
     private final SessionApi sessionApi;
     private final ResponseValidator validator;
-
-    public TodoExample(ApiClient apiClient) {
-        this.sessionApi = new SessionApi(apiClient);
-        this.validator = null;
-    }
 
     public TodoExample(ExampleContext context) {
         this.sessionApi = new SessionApi(context.getApiClient());
@@ -99,22 +92,4 @@ public class TodoExample {
         }
     }
 
-    public static void main(String[] args) {
-        try {
-            // Configure the client
-            ApiClient apiClient = new ApiClient();
-            apiClient.updateBaseUri("http://localhost:4096");
-            String credentials = "opencode:opencode123";
-            String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
-            apiClient.setRequestInterceptor(builder -> builder.header("Authorization", "Basic " + encoded));
-
-            // Run the example
-            TodoExample example = new TodoExample(apiClient);
-            example.demonstrateTodoOperations();
-
-        } catch (Exception e) {
-            System.err.println("Failed to run TodoExample: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
 }

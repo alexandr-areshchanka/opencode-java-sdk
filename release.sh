@@ -116,6 +116,38 @@ git_has_snapshot_commit() {
 }
 
 # ---------------------------------------------------------------------------
+# Clean-tree guard
+# ---------------------------------------------------------------------------
+# Abort the release if any unexpected (non-release) file is staged or
+# modified. Prevents a stray file (.env, scratch, secret) from riding along
+# into an immutable release tag. The only files a release may touch are:
+# pom.xml, examples/spring-boot/pom.xml, and .opencode-version.
+git_assert_clean_tree() {
+    local porcelain unexpected=""
+    porcelain="$(git status --porcelain)"
+
+    if [[ -n "${porcelain}" ]]; then
+        # "git status --porcelain" lines are "XY <path>" (2 status chars + space).
+        # Strip the 3-char prefix, then keep any path that is NOT a release file.
+        unexpected="$(printf '%s\n' "${porcelain}" \
+            | sed 's/^...//' \
+            | grep -vxF -e 'pom.xml' \
+                       -e 'examples/spring-boot/pom.xml' \
+                       -e '.opencode-version' \
+            || true)"
+    fi
+
+    if [[ -n "${unexpected}" ]]; then
+        log_error "Aborting release: unexpected files are staged or modified."
+        log_error "A release may only change: pom.xml, examples/spring-boot/pom.xml, .opencode-version."
+        log_error "Unexpected changes:"
+        printf '%s\n' "${unexpected}" | sed 's/^/    /'
+        log_error "Stash, commit, or revert these files before re-running the release."
+        exit 1
+    fi
+}
+
+# ---------------------------------------------------------------------------
 # STEP 1: Read / set target version
 # ---------------------------------------------------------------------------
 step_read_version() {
@@ -359,7 +391,13 @@ step_git_commit_clean() {
     fi
 
     cd "${PROJECT_ROOT}"
-    git add -A
+
+    # Clean-tree guard: no stray file (.env, scratch, secret) may ride along
+    # into the immutable release tag.
+    git_assert_clean_tree
+
+    # Stage ONLY the release-relevant files — never `git add -A`.
+    git add -- pom.xml examples/spring-boot/pom.xml .opencode-version
     git commit -m "Release v${TARGET_VERSION}" --allow-empty
     log_success "Committed clean version v${TARGET_VERSION}"
 }
@@ -428,7 +466,13 @@ step_git_commit_snapshot() {
     fi
 
     cd "${PROJECT_ROOT}"
-    git add -A
+
+    # Clean-tree guard: no stray file (.env, scratch, secret) may ride along
+    # into the SNAPSHOT bump commit.
+    git_assert_clean_tree
+
+    # Stage ONLY the release-relevant files — never `git add -A`.
+    git add -- pom.xml examples/spring-boot/pom.xml .opencode-version
     git commit -m "Bump to ${NEXT_VERSION}-SNAPSHOT" --allow-empty
     log_success "Committed ${NEXT_VERSION}-SNAPSHOT"
 }

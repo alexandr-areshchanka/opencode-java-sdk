@@ -23,6 +23,7 @@ class SessionCrudControllerIT extends AbstractIntegrationTest {
 
         assertThat(response.getStatusCode().value()).isEqualTo(200);
         assertThat(response.getBody()).isNotNull();
+        response.getBody().forEach(session -> assertThat(session.getId()).isNotBlank());
     }
 
     @Test
@@ -35,6 +36,9 @@ class SessionCrudControllerIT extends AbstractIntegrationTest {
 
         assertThat(response.getStatusCode().value()).isEqualTo(200);
         assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getId()).isNotBlank();
+        assertThat(response.getBody().getTitle()).isEqualTo("Test Session");
+        trackSession(response.getBody().getId());
     }
 
     @Test

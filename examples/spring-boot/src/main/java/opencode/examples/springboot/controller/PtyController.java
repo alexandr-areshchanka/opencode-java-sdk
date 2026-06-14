@@ -1,5 +1,6 @@
 package opencode.examples.springboot.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import opencode.sdk.invoker.ApiException;
 import opencode.sdk.model.Pty;
@@ -23,7 +24,7 @@ public class PtyController {
     }
 
     @PostMapping
-    public Pty createPty(@RequestBody PtyCreateRequest request) throws ApiException {
+    public Pty createPty(@Valid @RequestBody PtyCreateRequest request) throws ApiException {
         return openCodeService.ptyApi().ptyCreate(null, null, request);
     }
 
@@ -33,7 +34,7 @@ public class PtyController {
     }
 
     @PatchMapping("/{id}")
-    public Pty updatePty(@PathVariable String id, @RequestBody PtyUpdateRequest request) throws ApiException {
+    public Pty updatePty(@PathVariable String id, @Valid @RequestBody PtyUpdateRequest request) throws ApiException {
         return openCodeService.ptyApi().ptyUpdate(id, null, null, request);
     }
 

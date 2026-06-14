@@ -1,12 +1,16 @@
 package opencode.examples.plainjava;
 
+import opencode.examples.plainjava.testing.ExampleContext;
+import opencode.examples.plainjava.testing.ResourceTracker;
+import opencode.examples.plainjava.testing.ResponseValidator;
+import opencode.examples.plainjava.testing.SdkClientFactory;
+import opencode.examples.plainjava.testing.TestConfiguration;
 import opencode.sdk.api.GlobalApi;
 import opencode.sdk.invoker.ApiClient;
 import opencode.sdk.invoker.ApiException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Base64;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -18,19 +22,21 @@ public class Main {
         logger.info("Starting OpenCode Java SDK Examples");
         logger.info("====================================");
 
-        // Configure the client with Basic Auth
-        ApiClient apiClient = new ApiClient();
-        apiClient.updateBaseUri("http://localhost:4096");
-        String credentials = "opencode:opencode123";
-        String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
-        apiClient.setRequestInterceptor(builder -> builder.header("Authorization", "Basic " + encoded));
+        // Build the shared client and context via the harness wiring
+        TestConfiguration config = new TestConfiguration();
+        ApiClient apiClient = SdkClientFactory.createClient(
+                config.getBaseUrl(), config.getUsername(), config.getPassword());
+
+        ResourceTracker tracker = new ResourceTracker();
+        ResponseValidator validator = new ResponseValidator();
+        ExampleContext context = new ExampleContext(apiClient, config, tracker, validator);
 
         // Launch EventStreamingExample in background thread (SSE is long-running)
         AtomicBoolean sseRunning = new AtomicBoolean(true);
         AtomicReference<String> sseResult = new AtomicReference<>("<no result>");
         Thread eventStreamingThread = new Thread(() -> {
             try {
-                EventStreamingExample eventStreamingExample = new EventStreamingExample(apiClient);
+                EventStreamingExample eventStreamingExample = new EventStreamingExample(context);
                 eventStreamingExample.demonstrateEventStreaming();
                 sseResult.set("completed");
             } catch (Exception e) {
@@ -51,49 +57,49 @@ public class Main {
             // Run System Info Example
             logger.info("\n");
             logger.info("========================================");
-            SystemInfoExample systemInfoExample = new SystemInfoExample(apiClient);
+            SystemInfoExample systemInfoExample = new SystemInfoExample(context);
             systemInfoExample.demonstrateSystemInfo();
 
             // Run Configuration Example
             logger.info("\n");
             logger.info("========================================");
-            ConfigurationExample configurationExample = new ConfigurationExample(apiClient);
+            ConfigurationExample configurationExample = new ConfigurationExample(context);
             configurationExample.demonstrateConfiguration();
 
             // Run Provider Example
             logger.info("\n");
             logger.info("========================================");
-            ProviderExample providerExample = new ProviderExample(apiClient);
+            ProviderExample providerExample = new ProviderExample(context);
             providerExample.demonstrateProviders();
 
             // Run Project Example
             logger.info("\n");
             logger.info("========================================");
-            ProjectExample projectExample = new ProjectExample(apiClient);
+            ProjectExample projectExample = new ProjectExample(context);
             projectExample.demonstrateProjectOperations();
 
             // Run File Operations Example
             logger.info("\n");
             logger.info("========================================");
-            FileOperationsExample fileOperationsExample = new FileOperationsExample(apiClient);
+            FileOperationsExample fileOperationsExample = new FileOperationsExample(context);
             fileOperationsExample.demonstrateFileOperations();
 
             // Run Session CRUD Example
             logger.info("\n");
             logger.info("========================================");
-            SessionCrudExample sessionCrudExample = new SessionCrudExample(apiClient);
+            SessionCrudExample sessionCrudExample = new SessionCrudExample(context);
             sessionCrudExample.demonstrateSessionCrud();
 
             // Run Session Advanced Example
             logger.info("\n");
             logger.info("========================================");
-            SessionAdvancedExample sessionAdvancedExample = new SessionAdvancedExample(apiClient);
+            SessionAdvancedExample sessionAdvancedExample = new SessionAdvancedExample(context);
             sessionAdvancedExample.demonstrateAdvancedSessionOperations();
 
             // Run Message Example
             logger.info("\n");
             logger.info("========================================");
-            MessageExample messageExample = new MessageExample(apiClient);
+            MessageExample messageExample = new MessageExample(context);
             messageExample.demonstrateMessaging();
 
             // ========== Phase 2 Examples ==========
@@ -101,49 +107,49 @@ public class Main {
             // Run DevTools Example
             logger.info("\n");
             logger.info("========================================");
-            DevToolsExample devToolsExample = new DevToolsExample(apiClient);
+            DevToolsExample devToolsExample = new DevToolsExample(context);
             devToolsExample.demonstrateDevTools();
 
             // Run Experimental Example
             logger.info("\n");
             logger.info("========================================");
-            ExperimentalExample experimentalExample = new ExperimentalExample(apiClient);
+            ExperimentalExample experimentalExample = new ExperimentalExample(context);
             experimentalExample.demonstrateExperimentalApis();
 
             // Run Instance Example
             logger.info("\n");
             logger.info("========================================");
-            InstanceExample instanceExample = new InstanceExample(apiClient);
+            InstanceExample instanceExample = new InstanceExample(context);
             instanceExample.demonstrateInstanceManagement();
 
             // Run Interactive Example
             logger.info("\n");
             logger.info("========================================");
-            InteractiveExample interactiveExample = new InteractiveExample(apiClient);
+            InteractiveExample interactiveExample = new InteractiveExample(context);
             interactiveExample.demonstrateInteractiveApis();
 
             // Run MCP Example
             logger.info("\n");
             logger.info("========================================");
-            McpExample mcpExample = new McpExample(apiClient);
+            McpExample mcpExample = new McpExample(context);
             mcpExample.demonstrateMcpOperations();
 
             // Run Todo Example
             logger.info("\n");
             logger.info("========================================");
-            TodoExample todoExample = new TodoExample(apiClient);
+            TodoExample todoExample = new TodoExample(context);
             todoExample.demonstrateTodoOperations();
 
             // Run VCS Example
             logger.info("\n");
             logger.info("========================================");
-            VcsExample vcsExample = new VcsExample(apiClient);
+            VcsExample vcsExample = new VcsExample(context);
             vcsExample.demonstrateVcsOperations();
 
             // Run PTY Example
             logger.info("\n");
             logger.info("========================================");
-            PtyExample ptyExample = new PtyExample(apiClient);
+            PtyExample ptyExample = new PtyExample(context);
             ptyExample.demonstratePtyOperations();
 
             logger.info("\n");

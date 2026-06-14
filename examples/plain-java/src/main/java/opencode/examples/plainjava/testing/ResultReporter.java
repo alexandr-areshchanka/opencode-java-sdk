@@ -96,34 +96,34 @@ public class ResultReporter {
             }
         }
 
-        // Report API coverage
-        reportApiCoverage(results);
+        // Report demonstrated endpoints
+        reportDemonstratedEndpoints(results);
 
         logger.info("========================================");
     }
 
-    private void reportApiCoverage(TestResults results) {
+    private void reportDemonstratedEndpoints(TestResults results) {
         logger.info("");
-        logger.info("API Coverage:");
+        logger.info("Demonstrated Endpoints:");
 
-        Set<String> allEndpoints = registry.getAllCoveredEndpoints();
+        Set<String> allEndpoints = registry.getAllDemonstratedEndpoints();
         int testedEndpoints = 0;
 
         for (TestResult result : results.getResults()) {
             if (result.isSuccess()) {
-                Set<String> endpoints = registry.getApiEndpoints(result.getExampleName());
+                Set<String> endpoints = registry.getDemonstratedEndpoints(result.getExampleName());
                 testedEndpoints += endpoints.size();
             }
         }
 
-        logger.info("  Total API Endpoints Covered: {}", allEndpoints.size());
-        logger.info("  Successfully Tested Endpoints: {}", testedEndpoints);
+        logger.info("  Total Demonstrated Endpoints: {}", allEndpoints.size());
+        logger.info("  Successfully Demonstrated Endpoints: {}", testedEndpoints);
 
-        // Show coverage by category
+        // Show demonstrated endpoints by example
         logger.info("");
-        logger.info("Coverage by Example:");
+        logger.info("Endpoints by Example:");
         for (TestResult result : results.getResults()) {
-            Set<String> endpoints = registry.getApiEndpoints(result.getExampleName());
+            Set<String> endpoints = registry.getDemonstratedEndpoints(result.getExampleName());
             String status = result.isSuccess() ? colorize("✓", ANSI_GREEN) : colorize("✗", ANSI_RED);
             logger.info("  {} {} - {} endpoint(s)", status, result.getExampleName(), endpoints.size());
         }

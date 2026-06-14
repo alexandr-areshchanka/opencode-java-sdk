@@ -1,5 +1,6 @@
 package opencode.examples.springboot.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import opencode.sdk.invoker.ApiException;
@@ -28,7 +29,7 @@ public class MessageController {
     @PostMapping("/{sessionId}/prompt")
     public SessionPrompt200Response sendPrompt(
             @PathVariable String sessionId,
-            @RequestBody SessionPromptRequest request) throws ApiException {
+            @Valid @RequestBody SessionPromptRequest request) throws ApiException {
         return openCodeService.sessionApi().sessionPrompt(sessionId, null, null, request);
     }
 

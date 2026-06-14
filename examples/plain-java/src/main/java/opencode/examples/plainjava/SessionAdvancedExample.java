@@ -4,13 +4,11 @@ import opencode.examples.plainjava.testing.ExampleContext;
 import opencode.examples.plainjava.testing.ResourceTracker;
 import opencode.examples.plainjava.testing.ResponseValidator;
 import opencode.sdk.api.SessionApi;
-import opencode.sdk.invoker.ApiClient;
 import opencode.sdk.invoker.ApiException;
 import opencode.sdk.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Base64;
 import java.util.List;
 
 public class SessionAdvancedExample {
@@ -20,12 +18,6 @@ public class SessionAdvancedExample {
     private final SessionApi sessionApi;
     private final ResponseValidator validator;
     private final ResourceTracker tracker;
-
-    public SessionAdvancedExample(ApiClient apiClient) {
-        this.sessionApi = new SessionApi(apiClient);
-        this.validator = null;
-        this.tracker = null;
-    }
 
     public SessionAdvancedExample(ExampleContext context) {
         this.sessionApi = new SessionApi(context.getApiClient());
@@ -304,21 +296,4 @@ public class SessionAdvancedExample {
         logger.info("Session unreverted successfully");
     }
 
-    public static void main(String[] args) {
-        try {
-            // Configure the client
-            ApiClient apiClient = new ApiClient();
-            apiClient.updateBaseUri("http://localhost:4096");
-            String credentials = "opencode:opencode123";
-            String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
-            apiClient.setRequestInterceptor(builder -> builder.header("Authorization", "Basic " + encoded));
-
-            SessionAdvancedExample example = new SessionAdvancedExample(apiClient);
-            example.demonstrateAdvancedSessionOperations();
-
-        } catch (Exception e) {
-            System.err.println("Fatal error: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
 }

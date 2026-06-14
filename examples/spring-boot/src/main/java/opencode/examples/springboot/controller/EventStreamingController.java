@@ -17,12 +17,12 @@ public class EventStreamingController {
 
     private final OpenCodeService openCodeService;
 
-    @GetMapping(value = "/", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "/", produces = MediaType.APPLICATION_JSON_VALUE)
     public Event subscribeToEvents() throws ApiException {
         return openCodeService.eventApi().eventSubscribe(null, null);
     }
 
-    @GetMapping(value = "/global", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "/global", produces = MediaType.APPLICATION_JSON_VALUE)
     public GlobalEvent subscribeToGlobalEvents() throws ApiException {
         return openCodeService.globalApi().globalEvent();
     }

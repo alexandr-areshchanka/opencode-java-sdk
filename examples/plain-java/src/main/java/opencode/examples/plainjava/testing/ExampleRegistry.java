@@ -7,11 +7,11 @@ import java.util.*;
 public class ExampleRegistry {
 
     private final Map<String, Class<?>> exampleClasses = new LinkedHashMap<>();
-    private final Map<String, Set<String>> apiCoverage = new LinkedHashMap<>();
+    private final Map<String, Set<String>> demonstratedEndpoints = new LinkedHashMap<>();
 
     public ExampleRegistry() {
         registerAllExamples();
-        mapApiCoverage();
+        mapDemonstratedEndpoints();
     }
 
     private void registerAllExamples() {
@@ -34,60 +34,60 @@ public class ExampleRegistry {
         registerExample("Pty", PtyExample.class);
     }
 
-    private void mapApiCoverage() {
+    private void mapDemonstratedEndpoints() {
         // System & Global APIs
-        apiCoverage.put("SystemInfo", Set.of("global/health", "app/agents", "app/skills", "command/list"));
+        demonstratedEndpoints.put("SystemInfo", Set.of("global/health", "app/agents", "app/skills", "command/list"));
 
         // Configuration APIs
-        apiCoverage.put("Configuration", Set.of("config/get", "global/config/get", "config/providers", "config/update"));
+        demonstratedEndpoints.put("Configuration", Set.of("config/get", "global/config/get", "config/providers", "config/update"));
 
         // Provider APIs
-        apiCoverage.put("Provider", Set.of("provider/list", "provider/auth"));
+        demonstratedEndpoints.put("Provider", Set.of("provider/list", "provider/auth"));
 
         // Project APIs
-        apiCoverage.put("Project", Set.of("project/list", "project/current", "project/update"));
+        demonstratedEndpoints.put("Project", Set.of("project/list", "project/current", "project/update"));
 
         // File Operations APIs
-        apiCoverage.put("FileOperations", Set.of("file/list", "file/read", "file/status", "find/files", "find/text", "find/symbols"));
+        demonstratedEndpoints.put("FileOperations", Set.of("file/list", "file/read", "file/status", "find/files", "find/text", "find/symbols"));
 
         // Session CRUD APIs
-        apiCoverage.put("SessionCrud", Set.of("session/list", "session/create", "session/get", "session/update", "session/delete"));
+        demonstratedEndpoints.put("SessionCrud", Set.of("session/list", "session/create", "session/get", "session/update", "session/delete"));
 
         // Session Advanced APIs
-        apiCoverage.put("SessionAdvanced", Set.of("session/fork", "session/children", "session/share", "session/unshare",
+        demonstratedEndpoints.put("SessionAdvanced", Set.of("session/fork", "session/children", "session/share", "session/unshare",
                 "session/summarize", "session/abort", "session/revert", "session/unrevert"));
 
         // Message APIs
-        apiCoverage.put("Message", Set.of("session/prompt", "session/messages"));
+        demonstratedEndpoints.put("Message", Set.of("session/prompt", "session/messages"));
 
         // DevTools APIs
-        apiCoverage.put("DevTools", Set.of("lsp/status", "formatter/status"));
+        demonstratedEndpoints.put("DevTools", Set.of("lsp/status", "formatter/status"));
 
         // Experimental APIs
-        apiCoverage.put("Experimental", Set.of("experimental/session/list", "experimental/workspace/list",
+        demonstratedEndpoints.put("Experimental", Set.of("experimental/session/list", "experimental/workspace/list",
                 "experimental/workspace/create", "experimental/resource/list"));
 
         // Instance APIs
-        apiCoverage.put("Instance", Set.of("instance/dispose", "global/dispose"));
+        demonstratedEndpoints.put("Instance", Set.of("instance/dispose", "global/dispose"));
 
         // Interactive APIs
-        apiCoverage.put("Interactive", Set.of("tool/ids", "tool/list", "question/list", "question/reply",
+        demonstratedEndpoints.put("Interactive", Set.of("tool/ids", "tool/list", "question/list", "question/reply",
                 "question/reject", "permission/list", "permission/reply"));
 
         // MCP APIs
-        apiCoverage.put("Mcp", Set.of("mcp/status", "mcp/add", "mcp/connect", "mcp/auth/start"));
+        demonstratedEndpoints.put("Mcp", Set.of("mcp/status", "mcp/add", "mcp/connect", "mcp/auth/start"));
 
         // Todo APIs
-        apiCoverage.put("Todo", Set.of("session/todo"));
+        demonstratedEndpoints.put("Todo", Set.of("session/todo"));
 
         // VCS APIs
-        apiCoverage.put("Vcs", Set.of("vcs/get", "worktree/list", "worktree/create", "worktree/remove"));
+        demonstratedEndpoints.put("Vcs", Set.of("vcs/get", "worktree/list", "worktree/create", "worktree/remove"));
 
         // Event Streaming APIs
-        apiCoverage.put("EventStreaming", Set.of("event/subscribe", "global/event"));
+        demonstratedEndpoints.put("EventStreaming", Set.of("event/subscribe", "global/event"));
 
         // PTY APIs
-        apiCoverage.put("Pty", Set.of("pty/list", "pty/create", "pty/get", "pty/update", "pty/remove"));
+        demonstratedEndpoints.put("Pty", Set.of("pty/list", "pty/create", "pty/get", "pty/update", "pty/remove"));
     }
 
     public void registerExample(String name, Class<?> exampleClass) {
@@ -110,19 +110,19 @@ public class ExampleRegistry {
         return exampleClasses.size();
     }
 
-    public Set<String> getApiEndpoints(String exampleName) {
-        return apiCoverage.getOrDefault(exampleName, Collections.emptySet());
+    public Set<String> getDemonstratedEndpoints(String exampleName) {
+        return demonstratedEndpoints.getOrDefault(exampleName, Collections.emptySet());
     }
 
-    public Set<String> getAllCoveredEndpoints() {
+    public Set<String> getAllDemonstratedEndpoints() {
         Set<String> allEndpoints = new HashSet<>();
-        for (Set<String> endpoints : apiCoverage.values()) {
+        for (Set<String> endpoints : demonstratedEndpoints.values()) {
             allEndpoints.addAll(endpoints);
         }
         return allEndpoints;
     }
 
-    public Map<String, Set<String>> getApiCoverageMap() {
-        return new LinkedHashMap<>(apiCoverage);
+    public Map<String, Set<String>> getDemonstratedEndpointsMap() {
+        return new LinkedHashMap<>(demonstratedEndpoints);
     }
 }

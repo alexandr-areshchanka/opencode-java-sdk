@@ -1,5 +1,6 @@
 package opencode.examples.springboot.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import opencode.sdk.model.Project;
 import opencode.sdk.model.ProjectUpdateRequest;
@@ -26,7 +27,7 @@ public class ProjectController {
     }
 
     @PatchMapping("/current")
-    public Project updateCurrentProject(@RequestBody ProjectUpdateRequest request) throws Exception {
+    public Project updateCurrentProject(@Valid @RequestBody ProjectUpdateRequest request) throws Exception {
         Project currentProject = openCodeService.projectApi().projectCurrent(null, null);
         return openCodeService.projectApi().projectUpdate(currentProject.getId(), null, null, request);
     }

@@ -1,5 +1,6 @@
 package opencode.examples.springboot.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import opencode.sdk.invoker.ApiException;
 import opencode.sdk.model.*;
@@ -23,7 +24,7 @@ public class SessionAdvancedController {
     @PostMapping("/{sessionId}/fork")
     public ResponseEntity<?> forkSession(
             @PathVariable String sessionId,
-            @RequestBody SessionForkRequest request) throws ApiException {
+            @Valid @RequestBody SessionForkRequest request) throws ApiException {
         if (!isValidSessionId(sessionId)) {
             return ResponseEntity.notFound().build();
         }
@@ -34,7 +35,7 @@ public class SessionAdvancedController {
     @PostMapping("/{sessionId}/revert")
     public ResponseEntity<?> revertSession(
             @PathVariable String sessionId,
-            @RequestBody SessionRevertRequest request) throws ApiException {
+            @Valid @RequestBody SessionRevertRequest request) throws ApiException {
         if (!isValidSessionId(sessionId)) {
             return ResponseEntity.notFound().build();
         }
@@ -54,7 +55,7 @@ public class SessionAdvancedController {
     @PostMapping("/{sessionId}/summarize")
     public ResponseEntity<?> summarizeSession(
             @PathVariable String sessionId,
-            @RequestBody SessionSummarizeRequest request) throws ApiException {
+            @Valid @RequestBody SessionSummarizeRequest request) throws ApiException {
         if (!isValidSessionId(sessionId)) {
             return ResponseEntity.notFound().build();
         }
@@ -74,7 +75,7 @@ public class SessionAdvancedController {
     @PostMapping("/{sessionId}/command")
     public ResponseEntity<?> sendCommand(
             @PathVariable String sessionId,
-            @RequestBody SessionCommandRequest request) throws ApiException {
+            @Valid @RequestBody SessionCommandRequest request) throws ApiException {
         if (!isValidSessionId(sessionId)) {
             return ResponseEntity.notFound().build();
         }
@@ -85,7 +86,7 @@ public class SessionAdvancedController {
     @PostMapping("/{sessionId}/shell")
     public ResponseEntity<?> executeShell(
             @PathVariable String sessionId,
-            @RequestBody SessionShellRequest request) throws ApiException {
+            @Valid @RequestBody SessionShellRequest request) throws ApiException {
         if (!isValidSessionId(sessionId)) {
             return ResponseEntity.notFound().build();
         }

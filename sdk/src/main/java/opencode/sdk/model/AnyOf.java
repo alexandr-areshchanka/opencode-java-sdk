@@ -1,13 +1,11 @@
 package opencode.sdk.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
+import opencode.sdk.invoker.ApiClient;
+
 import java.util.Collections;
 import java.util.Map;
-import java.util.StringJoiner;
 import java.util.Objects;
-
-import opencode.sdk.invoker.ApiClient;
+import java.util.StringJoiner;
 
 /**
  * Represents an anyOf schema that accepts any value (including null).

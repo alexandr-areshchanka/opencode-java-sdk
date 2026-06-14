@@ -3,7 +3,6 @@ package opencode.examples.plainjava;
 import opencode.examples.plainjava.testing.ExampleContext;
 import opencode.examples.plainjava.testing.ResponseValidator;
 import opencode.sdk.api.ProviderApi;
-import opencode.sdk.invoker.ApiClient;
 import opencode.sdk.invoker.ApiException;
 import opencode.sdk.model.Provider;
 import opencode.sdk.model.ProviderAuthMethod;
@@ -11,7 +10,6 @@ import opencode.sdk.model.ProviderList200Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
@@ -21,11 +19,6 @@ public class ProviderExample {
 
     private final ProviderApi providerApi;
     private final ResponseValidator validator;
-
-    public ProviderExample(ApiClient apiClient) {
-        this.providerApi = new ProviderApi(apiClient);
-        this.validator = null;
-    }
 
     public ProviderExample(ExampleContext context) {
         this.providerApi = new ProviderApi(context.getApiClient());
@@ -131,30 +124,4 @@ public class ProviderExample {
         }
     }
 
-    public static void main(String[] args) {
-        logger.info("Starting Provider Example");
-        logger.info("========================");
-
-        // Configure the client with Basic Auth
-        ApiClient apiClient = new ApiClient();
-        apiClient.updateBaseUri("http://localhost:4096");
-        String credentials = "opencode:opencode123";
-        String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
-        apiClient.setRequestInterceptor(builder -> builder.header("Authorization", "Basic " + encoded));
-
-        try {
-            // Run the example
-            ProviderExample example = new ProviderExample(apiClient);
-            example.demonstrateProviders();
-
-            logger.info("\n");
-            logger.info("========================");
-            logger.info("Example completed successfully!");
-
-        } catch (Exception e) {
-            logger.error("Error running example: {}", e.getMessage(), e);
-            System.err.println("Fatal error: " + e.getMessage());
-            System.exit(1);
-        }
-    }
 }

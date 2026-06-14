@@ -140,6 +140,24 @@ git log -1 --oneline --grep="Bump to %GSC_VERSION%-SNAPSHOT" HEAD >nul 2>&1
 if not errorlevel 1 set "HAS_SNAP_COMMIT=1"
 goto :eof
 
+:git_assert_clean_tree
+REM Aborts the release if any unexpected (non-release) file is staged or
+REM modified. Prevents a stray file (.env, scratch, secret) from riding
+REM along into an immutable release tag. A release may only change:
+REM pom.xml, examples\spring-boot\pom.xml, .opencode-version.
+REM (git --porcelain emits forward slashes on Windows; we match those.)
+set "GCT_UNEXPECTED="
+for /f "delims=" %%u in ('git status --porcelain ^| findstr /R /V /C:" pom.xml$" /C:" examples/spring-boot/pom.xml$" /C:" .opencode-version$"') do set "GCT_UNEXPECTED=1"
+if not defined GCT_UNEXPECTED goto :gct_clean
+call :log_error "Aborting release: unexpected files are staged or modified."
+call :log_error "A release may only change: pom.xml, examples\spring-boot\pom.xml, .opencode-version."
+call :log_error "Unexpected changes:"
+for /f "delims=" %%u in ('git status --porcelain ^| findstr /R /V /C:" pom.xml$" /C:" examples/spring-boot/pom.xml$" /C:" .opencode-version$"') do call :log_error "    %%u"
+call :log_error "Stash, commit, or revert these files before re-running the release."
+exit /b 1
+:gct_clean
+goto :eof
+
 REM ===========================================================================
 REM STEP 1: Read / set target version
 REM ===========================================================================
@@ -418,7 +436,14 @@ if "%HAS_COMMIT%"=="1" (
 )
 
 cd /d "%PROJECT_ROOT%"
-git add -A
+
+REM Clean-tree guard: no stray file (.env, scratch, secret) may ride along
+REM into the immutable release tag.
+call :git_assert_clean_tree
+if errorlevel 1 exit /b 1
+
+REM Stage ONLY the release-relevant files (never use git add -A).
+git add -- pom.xml examples/spring-boot/pom.xml .opencode-version
 git commit -m "Release v%TARGET_VERSION%" --allow-empty
 call :log_success "Committed clean version v%TARGET_VERSION%"
 goto :eof
@@ -498,7 +523,14 @@ if "%HAS_SNAP_COMMIT%"=="1" (
 )
 
 cd /d "%PROJECT_ROOT%"
-git add -A
+
+REM Clean-tree guard: no stray file (.env, scratch, secret) may ride along
+REM into the SNAPSHOT bump commit.
+call :git_assert_clean_tree
+if errorlevel 1 exit /b 1
+
+REM Stage ONLY the release-relevant files (never use git add -A).
+git add -- pom.xml examples/spring-boot/pom.xml .opencode-version
 git commit -m "Bump to %NEXT_VERSION%-SNAPSHOT" --allow-empty
 call :log_success "Committed %NEXT_VERSION%-SNAPSHOT"
 goto :eof

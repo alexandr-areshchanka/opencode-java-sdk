@@ -5,7 +5,6 @@ import opencode.examples.plainjava.testing.ResourceTracker;
 import opencode.examples.plainjava.testing.ResponseValidator;
 import opencode.sdk.api.GlobalApi;
 import opencode.sdk.api.SessionApi;
-import opencode.sdk.invoker.ApiClient;
 import opencode.sdk.invoker.ApiException;
 import opencode.sdk.model.ExperimentalSessionListRootsParameter;
 import opencode.sdk.model.Session;
@@ -15,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
-import java.util.Base64;
 import java.util.List;
 
 public class SessionCrudExample {
@@ -26,13 +24,6 @@ public class SessionCrudExample {
     private final GlobalApi globalApi;
     private final ResponseValidator validator;
     private final ResourceTracker tracker;
-
-    public SessionCrudExample(ApiClient apiClient) {
-        this.sessionApi = new SessionApi(apiClient);
-        this.globalApi = new GlobalApi(apiClient);
-        this.validator = null;
-        this.tracker = null;
-    }
 
     public SessionCrudExample(ExampleContext context) {
         this.sessionApi = new SessionApi(context.getApiClient());
@@ -183,34 +174,4 @@ public class SessionCrudExample {
         }
     }
 
-    public static void main(String[] args) {
-        logger.info("Starting Session CRUD Example");
-
-        // Configure the client with Basic Auth
-        ApiClient apiClient = new ApiClient();
-        apiClient.updateBaseUri("http://localhost:4096");
-        String credentials = "opencode:opencode123";
-        String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
-        apiClient.setRequestInterceptor(builder -> builder.header("Authorization", "Basic " + encoded));
-
-        try {
-            // Verify connection with health check
-            GlobalApi globalApi = new GlobalApi(apiClient);
-            var health = globalApi.globalHealth();
-            logger.info("Connected to OpenCode server (version: {})", health.getVersion());
-
-            // Run the example
-            SessionCrudExample example = new SessionCrudExample(apiClient);
-            example.demonstrateSessionCrud();
-
-            logger.info("Session CRUD Example completed");
-
-        } catch (ApiException e) {
-            logger.error("Failed to connect to OpenCode server: {}", e.getMessage());
-            System.exit(1);
-        } catch (Exception e) {
-            logger.error("Unexpected error: {}", e.getMessage(), e);
-            System.exit(1);
-        }
-    }
 }

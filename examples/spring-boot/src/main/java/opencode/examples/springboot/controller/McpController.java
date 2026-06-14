@@ -1,5 +1,6 @@
 package opencode.examples.springboot.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import opencode.sdk.invoker.ApiException;
 import opencode.sdk.model.*;
@@ -21,7 +22,7 @@ public class McpController {
     }
 
     @PostMapping
-    public Map<String, MCPStatus> addMcpServer(@RequestBody McpAddRequest request) throws ApiException {
+    public Map<String, MCPStatus> addMcpServer(@Valid @RequestBody McpAddRequest request) throws ApiException {
         return openCodeService.mcpApi().mcpAdd(null, null, request);
     }
 
@@ -39,7 +40,7 @@ public class McpController {
     @PostMapping("/{name}/auth/callback")
     public MCPStatus mcpAuthCallback(
             @PathVariable String name,
-            @RequestBody McpAuthCallbackRequest request) throws ApiException {
+            @Valid @RequestBody McpAuthCallbackRequest request) throws ApiException {
         return openCodeService.mcpApi().mcpAuthCallback(name, null, null, request);
     }
 

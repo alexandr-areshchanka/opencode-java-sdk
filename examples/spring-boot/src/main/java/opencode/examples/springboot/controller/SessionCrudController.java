@@ -1,5 +1,6 @@
 package opencode.examples.springboot.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import opencode.sdk.invoker.ApiException;
 import opencode.sdk.model.*;
@@ -26,7 +27,7 @@ public class SessionCrudController {
     }
 
     @PostMapping
-    public Session createSession(@RequestBody SessionCreateRequest request) throws ApiException {
+    public Session createSession(@Valid @RequestBody SessionCreateRequest request) throws ApiException {
         return openCodeService.sessionApi().sessionCreate(null, null, request);
     }
 
@@ -42,7 +43,7 @@ public class SessionCrudController {
     @PatchMapping("/{sessionId}")
     public ResponseEntity<?> updateSession(
             @PathVariable String sessionId,
-            @RequestBody SessionUpdateRequest request) throws ApiException {
+            @Valid @RequestBody SessionUpdateRequest request) throws ApiException {
         if (!isValidSessionId(sessionId)) {
             return ResponseEntity.notFound().build();
         }
@@ -62,7 +63,7 @@ public class SessionCrudController {
     @PostMapping("/{sessionId}/init")
     public ResponseEntity<?> initSession(
             @PathVariable String sessionId,
-            @RequestBody SessionInitRequest request) throws ApiException {
+            @Valid @RequestBody SessionInitRequest request) throws ApiException {
         if (!isValidSessionId(sessionId)) {
             return ResponseEntity.notFound().build();
         }

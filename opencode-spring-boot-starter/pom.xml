@@ -7,7 +7,7 @@
 
     <parent>
         <groupId>io.opencode</groupId>
-        <artifactId>opencode-java-dsk</artifactId>
+        <artifactId>opencode-java-sdk</artifactId>
         <version>${revision}</version>
     </parent>
 

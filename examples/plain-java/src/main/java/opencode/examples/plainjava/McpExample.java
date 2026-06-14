@@ -4,14 +4,12 @@ import opencode.examples.plainjava.testing.ExampleContext;
 import opencode.examples.plainjava.testing.ResponseValidator;
 import opencode.sdk.api.ExperimentalApi;
 import opencode.sdk.api.McpApi;
-import opencode.sdk.invoker.ApiClient;
 import opencode.sdk.invoker.ApiException;
 import opencode.sdk.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.Map;
 
 public class McpExample {
@@ -21,12 +19,6 @@ public class McpExample {
     private final McpApi mcpApi;
     private final ExperimentalApi experimentalApi;
     private final ResponseValidator validator;
-
-    public McpExample(ApiClient apiClient) {
-        this.mcpApi = new McpApi(apiClient);
-        this.experimentalApi = new ExperimentalApi(apiClient);
-        this.validator = null;
-    }
 
     public McpExample(ExampleContext context) {
         this.mcpApi = new McpApi(context.getApiClient());
@@ -187,30 +179,4 @@ public class McpExample {
         }
     }
 
-    public static void main(String[] args) {
-        logger.info("Starting MCP Example");
-        logger.info("===================");
-
-        // Configure the client with Basic Auth
-        ApiClient apiClient = new ApiClient();
-        apiClient.updateBaseUri("http://localhost:4096");
-        String credentials = "opencode:opencode123";
-        String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
-        apiClient.setRequestInterceptor(builder -> builder.header("Authorization", "Basic " + encoded));
-
-        try {
-            // Run the example
-            McpExample example = new McpExample(apiClient);
-            example.demonstrateMcpOperations();
-
-            logger.info("\n");
-            logger.info("===================");
-            logger.info("Example completed successfully!");
-
-        } catch (Exception e) {
-            logger.error("Error running example: {}", e.getMessage(), e);
-            System.err.println("Fatal error: " + e.getMessage());
-            System.exit(1);
-        }
-    }
 }

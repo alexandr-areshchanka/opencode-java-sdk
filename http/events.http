@@ -1,24 +1,22 @@
 ### Event Streaming API Tests
 ### Tests for EventStreamingController endpoints
 ### Uses {{baseUrl}} from http-client.env.json
-### Note: These endpoints use Server-Sent Events (SSE)
+### Note: These endpoints return a single JSON object (not a stream)
 
-### Subscribe to session events (SSE — connection stays open)
+### Subscribe to session events (returns a JSON Event)
 GET {{baseUrl}}/api/events/
-Accept: text/event-stream
+Accept: application/json
 Cache-Control: no-cache
-Connection: keep-alive
 
 > {%
-  client.log("SSE subscription initiated");
+  client.log("Event subscription requested");
 %}
 
-### Subscribe to global events (SSE — connection stays open)
+### Subscribe to global events (returns a JSON GlobalEvent)
 GET {{baseUrl}}/api/events/global
-Accept: text/event-stream
+Accept: application/json
 Cache-Control: no-cache
-Connection: keep-alive
 
 > {%
-  client.log("Global SSE subscription initiated");
+  client.log("Global event subscription requested");
 %}

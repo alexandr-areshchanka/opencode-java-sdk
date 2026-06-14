@@ -15,13 +15,13 @@ flowchart TB
     end
 
     subgraph "Build Pipeline"
-        GEN["openapi-generator-maven-plugin<br/>v7.21.0"]
+        GEN["openapi-generator-maven-plugin<br/>v7.22.0"]
         FIX["maven-antrun-plugin<br/>Bug Fixes"]
         COMPILE["maven-compiler-plugin"]
     end
 
     subgraph "Generated Sources (target/generated-sources/openapi/)"
-        API["api/<br/>DefaultApi"]
+        API["api/<br/>22 API classes"]
         INVOKER["invoker/<br/>ApiClient, Configuration<br/>ApiException, JSON, etc."]
         MODELS["model/<br/>150+ Generated Models"]
     end
@@ -64,8 +64,7 @@ All classes below are **auto-generated** from `openapi.json` unless marked as ma
 
 | Class | Package | Source | Description |
 |-------|---------|--------|-------------|
-| `DefaultApi` | `opencode.sdk.api` | Generated | Main API class — entry point for all API calls |
-| `SessionApi` | `opencode.sdk.api` | Generated | Session-specific operations (sessionChildren, sessionGet) |
+| 22 API classes | `opencode.sdk.api` | Generated | One API class per OpenAPI tag/area (e.g. `SessionApi`, `GlobalApi`, `ConfigApi`, `EventApi`, `McpApi`, `SyncApi`, `V2Api`, `WorkspaceApi`); each constructed with an `ApiClient` |
 | `ApiClient` | `opencode.sdk.invoker` | Generated | Base HTTP client for all API calls |
 | `Configuration` | `opencode.sdk.invoker` | Generated | Global SDK configuration |
 | `ApiException` | `opencode.sdk.invoker` | Generated | API exception handling |
@@ -105,7 +104,7 @@ sdk/
 └── target/
     └── generated-sources/openapi/src/main/java/opencode/sdk/
         ├── api/
-        │   └── DefaultApi.java                     # Generated API class
+        │   └── *.java                              # 22 generated API classes (SessionApi, GlobalApi, ConfigApi, ...)
         ├── invoker/                                # Generated infrastructure
         │   ├── ApiClient.java
         │   ├── ApiException.java
@@ -133,7 +132,7 @@ sdk/
 
 The SDK build (`mvn compile -pl sdk` or `mvn compile` from `sdk/`) runs three phases automatically:
 
-1. **`openapi-generator-maven-plugin` (v7.21.0)** — generates Java sources from `sdk/openapi.json` into `target/generated-sources/openapi/`
+1. **`openapi-generator-maven-plugin` (v7.22.0)** — generates Java sources from `sdk/openapi.json` into `target/generated-sources/openapi/`
    - Generator: `java` with `library: native`
    - API package: `opencode.sdk.api`
    - Model package: `opencode.sdk.model`
@@ -185,9 +184,11 @@ The OpenAPI specification is located at `sdk/openapi.json`.
 
 ## API Package (opencode.sdk.api)
 
-### DefaultApi
+### API Classes (22 total)
 
-Main API class with comprehensive endpoint coverage:
+The SDK generates **22 API classes** — one per OpenAPI tag/area (there is no single `DefaultApi` entry point). Each class is constructed with an `ApiClient` and exposes the endpoint methods for its area. Representative classes: `ConfigApi`, `ControlApi`, `EventApi`, `ExperimentalApi`, `FileApi`, `GlobalApi`, `InstanceApi`, `McpApi`, `PermissionApi`, `ProjectApi`, `ProviderApi`, `PtyApi`, `PtyWsApi`, `QuestionApi`, `SessionApi`, `SyncApi`, `TuiApi`, `V2Api`, `V2MessagesApi`, `V2ModelsApi`, `V2ProvidersApi`, `WorkspaceApi`.
+
+The endpoint operations available across these API classes (grouped by area) include:
 
 **Application Endpoints:**
 - `appAgents()` - Get configured agents
@@ -359,7 +360,7 @@ try {
 | SLF4J API | 2.0.16 | compile | Logging facade |
 | JUnit Jupiter | 5.11.4 | test | Unit testing |
 | AssertJ | 3.26.3 | test | Fluent assertions |
-| OpenAPI Generator | 7.21.0 | plugin | Code generation |
+| OpenAPI Generator | 7.22.0 | plugin | Code generation |
 | Maven AntRun Plugin | 3.1.0 | plugin | Post-processing generated sources |
 
 ## Build Commands
@@ -387,7 +388,7 @@ cd sdk && mvn clean install -DskipTests
 ## Usage Example
 
 ```java
-import opencode.sdk.api.DefaultApi;
+import opencode.sdk.api.GlobalApi;
 import opencode.sdk.invoker.ApiClient;
 import opencode.sdk.invoker.ApiException;
 import opencode.sdk.model.GlobalHealth200Response;
@@ -398,8 +399,8 @@ apiClient.updateBaseUri("http://localhost:4096");
 String auth = Base64.getEncoder().encodeToString("opencode:opencode123".getBytes());
 apiClient.setRequestInterceptor(builder -> builder.header("Authorization", "Basic " + auth));
 
-// Create API instance
-DefaultApi api = new DefaultApi(apiClient);
+// Create API instance for the area you need (here: GlobalApi for globalHealth)
+GlobalApi api = new GlobalApi(apiClient);
 
 // Call API
 GlobalHealth200Response health = api.globalHealth();

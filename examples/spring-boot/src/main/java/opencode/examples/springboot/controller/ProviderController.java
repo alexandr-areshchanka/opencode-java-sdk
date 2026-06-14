@@ -1,5 +1,6 @@
 package opencode.examples.springboot.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import opencode.sdk.invoker.ApiException;
 import opencode.sdk.model.ProviderAuthAuthorization;
@@ -38,7 +39,7 @@ public class ProviderController {
     @PostMapping("/{provider}/oauth/authorize")
     public ProviderAuthAuthorization oauthAuthorize(
             @PathVariable String provider,
-            @RequestBody(required = false) ProviderOauthAuthorizeRequest request) throws ApiException {
+            @Valid @RequestBody(required = false) ProviderOauthAuthorizeRequest request) throws ApiException {
         return openCodeService.providerApi().providerOauthAuthorize(provider, null, null, request);
     }
 

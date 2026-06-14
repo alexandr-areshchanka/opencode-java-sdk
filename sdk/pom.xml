@@ -7,7 +7,7 @@
 
     <parent>
         <groupId>io.opencode</groupId>
-        <artifactId>opencode-java-dsk</artifactId>
+        <artifactId>opencode-java-sdk</artifactId>
         <version>${revision}</version>
     </parent>
 
@@ -90,11 +90,17 @@
                 </configuration>
             </plugin>
 
-            <!-- OpenAPI Generator Plugin - Commented out after manual fixes to generated code
-                 The generated code had issues with Map<K,V>.class syntax in anyOf schemas.
-                 Generated files have been manually fixed and copied to src/main/java.
-                 To regenerate: uncomment this plugin, run mvn generate-sources, apply manual fixes,
-                 and copy files back to src/main/java.
+            <!-- SDK build pipeline (three phases, all active):
+                 1) openapi-generator-maven-plugin generates Java sources from openapi.json into
+                    target/generated-sources/openapi/ (api/, invoker/, model/ packages).
+                 2) maven-antrun-plugin post-processes the generated sources in-place to fix
+                    known OpenAPI Generator bugs:
+                      - Map<K,V>.class -> Map.class   (parameterized type literal is invalid Java)
+                      - getMap<K,V>()  -> getMap()    (generics in method identifier is invalid Java)
+                 3) maven-compiler-plugin compiles the generated sources together with the
+                    hand-written sources in src/main/java (e.g. AnyOf.java) into the final jar.
+                 Generated sources under target/generated-sources/openapi/ must never be edited
+                 by hand; only files under src/main/java are maintained manually.
             -->
             <plugin>
                 <groupId>org.openapitools</groupId>

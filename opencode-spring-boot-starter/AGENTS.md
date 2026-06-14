@@ -18,8 +18,7 @@ flowchart TB
 
     subgraph "SDK Integration"
         CLIENT["ApiClient<br/>From SDK"]
-        DEFAULT_API["DefaultApi<br/>From SDK"]
-        SESSION_API["SessionApi<br/>From SDK"]
+        APIS["22 API classes<br/>From SDK"]
     end
 
     subgraph "Spring Boot"
@@ -29,11 +28,10 @@ flowchart TB
 
     AUTO --> PROPS
     AUTO --> CLIENT
-    AUTO --> DEFAULT_API
+    AUTO --> APIS
     AUTO --> SERVICE
-    SERVICE --> DEFAULT_API
+    SERVICE --> APIS
     SERVICE --> CLIENT
-    SERVICE --> SESSION_API
     SPRING --> BEANS
     BEANS --> AUTO
 
@@ -41,8 +39,7 @@ flowchart TB
     style PROPS fill:#e3f2fd
     style SERVICE fill:#e8f5e9
     style CLIENT fill:#fce4ec
-    style DEFAULT_API fill:#fce4ec
-    style SESSION_API fill:#fce4ec
+    style APIS fill:#fce4ec
 ```
 
 ## Key Classes
@@ -51,7 +48,7 @@ flowchart TB
 |-------|---------|-------------|
 | `OpenCodeAutoConfiguration` | `opencode.sdk.springboot.autoconfigure` | Configuration class creating SDK beans with `@ConditionalOnMissingBean` |
 | `OpenCodeProperties` | `opencode.sdk.springboot.autoconfigure` | Configuration properties binding with `opencode.*` prefix |
-| `OpenCodeService` | `opencode.sdk.springboot` | Spring-managed service wrapper exposing `DefaultApi` and `SessionApi` |
+| `OpenCodeService` | `opencode.sdk.springboot` | Spring-managed service wrapper exposing accessor methods for all 22 generated API classes (e.g. `sessionApi()`, `globalApi()`, `configApi()`) |
 
 ## Code Style Guidelines
 
@@ -104,13 +101,16 @@ public class OpenCodeProperties {
    ```java
    @Service
    public class OpenCodeService {
-       private final DefaultApi defaultApi;
        private final ApiClient apiClient;
 
-       public OpenCodeService(DefaultApi defaultApi, ApiClient apiClient) {
-           this.defaultApi = defaultApi;
+       public OpenCodeService(ApiClient apiClient) {
            this.apiClient = apiClient;
        }
+
+       public SessionApi sessionApi() {
+           return new SessionApi(apiClient);
+       }
+       // ... one accessor per generated API class (22 total)
    }
    ```
 
@@ -202,8 +202,8 @@ public class MyService {
 
     public void doSomething() throws ApiException {
         GlobalHealth200Response health = openCodeService.getHealth();
-        DefaultApi api = openCodeService.api();
         SessionApi sessionApi = openCodeService.sessionApi();
+        GlobalApi globalApi = openCodeService.globalApi();
     }
 }
 ```
@@ -212,7 +212,7 @@ public class MyService {
 
 - Do NOT create tests until directly asked
 - When testing auto-configuration, use `@TestConfiguration`
-- Mock `ApiClient` or `DefaultApi` for unit tests
+- Mock `ApiClient` for unit tests
 - Use `@SpringBootTest` for integration tests
 
 ## Spring Boot Best Practices
@@ -227,8 +227,7 @@ public class MyService {
 
 The starter depends on the SDK module and:
 1. Creates `ApiClient` bean with Basic Auth configuration from properties
-2. Creates `DefaultApi` bean from `ApiClient`
-3. Exposes `OpenCodeService` as a convenience wrapper providing access to both `DefaultApi` and `SessionApi`
+2. Exposes `OpenCodeService` as a convenience wrapper providing accessor methods for all 22 generated API classes (each constructed on demand from the shared `ApiClient`)
 
 ## Version Compatibility
 

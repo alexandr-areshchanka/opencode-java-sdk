@@ -3,14 +3,12 @@ package opencode.examples.plainjava;
 import opencode.examples.plainjava.testing.ExampleContext;
 import opencode.examples.plainjava.testing.ResponseValidator;
 import opencode.sdk.api.ProjectApi;
-import opencode.sdk.invoker.ApiClient;
 import opencode.sdk.invoker.ApiException;
 import opencode.sdk.model.Project;
 import opencode.sdk.model.ProjectUpdateRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Base64;
 import java.util.List;
 
 public class ProjectExample {
@@ -19,11 +17,6 @@ public class ProjectExample {
 
     private final ProjectApi projectApi;
     private final ResponseValidator validator;
-
-    public ProjectExample(ApiClient apiClient) {
-        this.projectApi = new ProjectApi(apiClient);
-        this.validator = null;
-    }
 
     public ProjectExample(ExampleContext context) {
         this.projectApi = new ProjectApi(context.getApiClient());
@@ -148,30 +141,4 @@ public class ProjectExample {
         }
     }
 
-    public static void main(String[] args) {
-        logger.info("Starting Project Example");
-        logger.info("========================");
-
-        // Configure the client with Basic Auth
-        ApiClient apiClient = new ApiClient();
-        apiClient.updateBaseUri("http://localhost:4096");
-        String credentials = "opencode:opencode123";
-        String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
-        apiClient.setRequestInterceptor(builder -> builder.header("Authorization", "Basic " + encoded));
-
-        try {
-            // Run the example
-            ProjectExample example = new ProjectExample(apiClient);
-            example.demonstrateProjectOperations();
-
-            logger.info("\n");
-            logger.info("========================");
-            logger.info("Example completed successfully!");
-
-        } catch (Exception e) {
-            logger.error("Error running example: {}", e.getMessage(), e);
-            System.err.println("Fatal error: " + e.getMessage());
-            System.exit(1);
-        }
-    }
 }

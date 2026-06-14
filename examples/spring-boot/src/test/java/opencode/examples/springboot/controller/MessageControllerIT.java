@@ -21,6 +21,9 @@ class MessageControllerIT extends AbstractIntegrationTest {
                         });
 
         assertThat(response.getStatusCode().value()).isIn(200, 404);
+        if (response.getStatusCode().is2xxSuccessful()) {
+            assertThat(response.getBody()).isNotNull();
+        }
     }
 
     @Test
@@ -28,7 +31,7 @@ class MessageControllerIT extends AbstractIntegrationTest {
         ResponseEntity<String> response =
                 restTemplate.postForEntity("/api/messages/invalid-session/abort", null, String.class);
 
-        assertThat(response.getStatusCode().value()).isIn(204, 404, 500);
+        assertThat(response.getStatusCode().value()).isIn(204, 404);
     }
 
     @Test
@@ -36,6 +39,6 @@ class MessageControllerIT extends AbstractIntegrationTest {
         ResponseEntity<String> response =
                 restTemplate.postForEntity("/api/messages/invalid-session/prompt", null, String.class);
 
-        assertThat(response.getStatusCode().value()).isIn(200, 400, 404, 500);
+        assertThat(response.getStatusCode().value()).isIn(200, 400, 404);
     }
 }

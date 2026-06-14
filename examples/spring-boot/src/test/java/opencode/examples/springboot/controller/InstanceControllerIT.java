@@ -16,6 +16,8 @@ class InstanceControllerIT extends AbstractIntegrationTest {
 
         assertThat(response.getStatusCode().value()).isEqualTo(200);
         assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getVersion()).isNotBlank();
+        assertThat(response.getBody().getHealthy()).isNotNull();
     }
 
     @Test
@@ -31,6 +33,6 @@ class InstanceControllerIT extends AbstractIntegrationTest {
         ResponseEntity<String> response =
                 restTemplate.exchange("/api/instances/test-instance", org.springframework.http.HttpMethod.DELETE, null, String.class);
 
-        assertThat(response.getStatusCode().value()).isIn(200, 500);
+        assertThat(response.getStatusCode().value()).isEqualTo(200);
     }
 }

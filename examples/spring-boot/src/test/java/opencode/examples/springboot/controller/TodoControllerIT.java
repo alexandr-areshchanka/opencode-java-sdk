@@ -21,6 +21,13 @@ class TodoControllerIT extends AbstractIntegrationTest {
                         });
 
         assertThat(response.getStatusCode().value()).isIn(200, 404);
+        if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+            response.getBody().forEach(todo -> {
+                assertThat(todo.getContent()).isNotBlank();
+                assertThat(todo.getStatus()).isNotBlank();
+                assertThat(todo.getPriority()).isNotBlank();
+            });
+        }
     }
 
     @Test
@@ -28,6 +35,6 @@ class TodoControllerIT extends AbstractIntegrationTest {
         ResponseEntity<String> response =
                 restTemplate.getForEntity("/api/todos/invalid-session-id", String.class);
 
-        assertThat(response.getStatusCode().value()).isIn(200, 404, 500);
+        assertThat(response.getStatusCode().value()).isIn(200, 404);
     }
 }

@@ -1,5 +1,6 @@
 package opencode.examples.springboot.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import opencode.sdk.invoker.ApiException;
 import opencode.sdk.model.*;
@@ -16,7 +17,7 @@ public class ExperimentalController {
     private final OpenCodeService openCodeService;
 
     @PostMapping("/workspace")
-    public Workspace createWorkspace(@RequestBody ExperimentalWorkspaceCreateRequest request) throws ApiException {
+    public Workspace createWorkspace(@Valid @RequestBody ExperimentalWorkspaceCreateRequest request) throws ApiException {
         return openCodeService.workspaceApi().experimentalWorkspaceCreate(null, null, request);
     }
 
@@ -26,12 +27,12 @@ public class ExperimentalController {
     }
 
     @PostMapping("/worktree")
-    public Worktree createWorktree(@RequestBody WorktreeCreateInput input) throws ApiException {
+    public Worktree createWorktree(@Valid @RequestBody WorktreeCreateInput input) throws ApiException {
         return openCodeService.experimentalApi().worktreeCreate(null, null, input);
     }
 
     @DeleteMapping("/worktree")
-    public Boolean removeWorktree(@RequestBody WorktreeRemoveInput input) throws ApiException {
+    public Boolean removeWorktree(@Valid @RequestBody WorktreeRemoveInput input) throws ApiException {
         return openCodeService.experimentalApi().worktreeRemove(null, null, input);
     }
 }

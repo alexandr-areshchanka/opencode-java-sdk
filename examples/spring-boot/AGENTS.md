@@ -89,7 +89,7 @@ The example implements 17 REST controllers that wrap the OpenCode SDK API endpoi
 
 | Controller | Base Path | Endpoints |
 |------------|-----------|-----------|
-| [`EventStreamingController`](src/main/java/opencode/examples/springboot/controller/EventStreamingController.java) | `/api/events` | GET / (SSE), GET /global (SSE) |
+| [`EventStreamingController`](src/main/java/opencode/examples/springboot/controller/EventStreamingController.java) | `/api/events` | GET / (JSON), GET /global (JSON) |
 | [`PtyController`](src/main/java/opencode/examples/springboot/controller/PtyController.java) | `/api/pty` | GET /, POST /, GET/PATCH/DELETE /{id} |
 
 ## Code Style Guidelines
@@ -212,7 +212,7 @@ HTTP test files are available in the `http/` directory at the project root for t
 - `http/mcp.http` - MCP server management
 - `http/todo.http` - Todo operations
 - `http/vcs.http` - Version control operations
-- `http/events.http` - SSE event streaming
+- `http/events.http` - Event subscription (JSON)
 - `http/pty.http` - PTY operations
 
 ## Project Structure
@@ -448,7 +448,7 @@ The TestContainers setup configures the OpenCode server with:
 - **Username:** opencode
 - **Password:** opencode123
 - **Health Check:** Waits for `/global/health` returning HTTP 200
-- **Startup Timeout:** 2 minutes
+- **Startup Timeout:** 30 seconds
 
 ### Building the Docker Image
 

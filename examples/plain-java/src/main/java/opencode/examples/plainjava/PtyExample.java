@@ -4,7 +4,6 @@ import opencode.examples.plainjava.testing.ExampleContext;
 import opencode.examples.plainjava.testing.ResourceTracker;
 import opencode.examples.plainjava.testing.ResponseValidator;
 import opencode.sdk.api.PtyApi;
-import opencode.sdk.invoker.ApiClient;
 import opencode.sdk.invoker.ApiException;
 import opencode.sdk.model.Pty;
 import opencode.sdk.model.PtyCreateRequest;
@@ -13,7 +12,6 @@ import opencode.sdk.model.PtyUpdateRequestSize;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Base64;
 import java.util.List;
 
 public class PtyExample {
@@ -23,12 +21,6 @@ public class PtyExample {
     private final PtyApi ptyApi;
     private final ResponseValidator validator;
     private final ResourceTracker tracker;
-
-    public PtyExample(ApiClient apiClient) {
-        this.ptyApi = new PtyApi(apiClient);
-        this.validator = null;
-        this.tracker = null;
-    }
 
     public PtyExample(ExampleContext context) {
         this.ptyApi = new PtyApi(context.getApiClient());
@@ -205,30 +197,4 @@ public class PtyExample {
         }
     }
 
-    public static void main(String[] args) {
-        logger.info("Starting PTY Example");
-        logger.info("====================");
-
-        // Configure the client with Basic Auth
-        ApiClient apiClient = new ApiClient();
-        apiClient.updateBaseUri("http://localhost:4096");
-        String credentials = "opencode:opencode123";
-        String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
-        apiClient.setRequestInterceptor(builder -> builder.header("Authorization", "Basic " + encoded));
-
-        try {
-            // Run the example
-            PtyExample example = new PtyExample(apiClient);
-            example.demonstratePtyOperations();
-
-            logger.info("\n");
-            logger.info("====================");
-            logger.info("Example completed successfully!");
-
-        } catch (Exception e) {
-            logger.error("Error running example: {}", e.getMessage(), e);
-            System.err.println("Fatal error: " + e.getMessage());
-            System.exit(1);
-        }
-    }
 }

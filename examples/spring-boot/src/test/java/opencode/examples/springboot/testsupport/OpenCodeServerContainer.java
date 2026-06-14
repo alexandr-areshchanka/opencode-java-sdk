@@ -29,7 +29,7 @@ public class OpenCodeServerContainer extends GenericContainer<OpenCodeServerCont
         withExposedPorts(OPENCODE_PORT);
 
         // Required environment variables for the OpenCode server
-        String apiKey = System.getenv().getOrDefault("Z_AI_API_KEY", "a039df3a972e4c91a2a19096832d7bed.RDyMzFm7qZ4jKXvh");
+        String apiKey = System.getenv().getOrDefault("Z_AI_API_KEY", "");
         LOGGER.info("Using Z_AI_API_KEY: {}...", apiKey.substring(0, Math.min(10, apiKey.length())));
 
         withEnv("Z_AI_API_KEY", apiKey);

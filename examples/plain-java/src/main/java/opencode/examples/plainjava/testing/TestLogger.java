@@ -8,7 +8,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-public class TestLogger {
+public class TestLogger implements AutoCloseable {
 
     private static final Logger logger = LoggerFactory.getLogger(TestLogger.class);
 

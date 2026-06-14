@@ -4,14 +4,11 @@ import opencode.examples.plainjava.testing.ExampleContext;
 import opencode.examples.plainjava.testing.ResourceTracker;
 import opencode.examples.plainjava.testing.ResponseValidator;
 import opencode.sdk.api.FileApi;
-import opencode.sdk.api.GlobalApi;
-import opencode.sdk.invoker.ApiClient;
 import opencode.sdk.invoker.ApiException;
 import opencode.sdk.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Base64;
 import java.util.List;
 
 public class FileOperationsExample {
@@ -21,12 +18,6 @@ public class FileOperationsExample {
     private final FileApi fileApi;
     private final ResponseValidator validator;
     private final ResourceTracker tracker;
-
-    public FileOperationsExample(ApiClient apiClient) {
-        this.fileApi = new FileApi(apiClient);
-        this.validator = null;
-        this.tracker = null;
-    }
 
     public FileOperationsExample(ExampleContext context) {
         this.fileApi = new FileApi(context.getApiClient());
@@ -232,33 +223,4 @@ public class FileOperationsExample {
         }
     }
 
-    public static void main(String[] args) {
-        logger.info("Starting File Operations Example");
-
-        // Configure the client with Basic Auth
-        ApiClient apiClient = new ApiClient();
-        apiClient.updateBaseUri("http://localhost:4096");
-        String credentials = "opencode:opencode123";
-        String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
-        apiClient.setRequestInterceptor(builder -> builder.header("Authorization", "Basic " + encoded));
-
-        try {
-            // Verify connection with health check
-            GlobalApi globalApi = new GlobalApi(apiClient);
-            var health = globalApi.globalHealth();
-            logger.info("Connected to OpenCode server (version: {})", health.getVersion());
-
-            // Run the example
-            FileOperationsExample example = new FileOperationsExample(apiClient);
-            example.demonstrateFileOperations();
-
-        } catch (ApiException e) {
-            System.err.println("Failed to connect to OpenCode server: " + e.getMessage());
-            System.exit(1);
-        } catch (Exception e) {
-            System.err.println("Unexpected error: " + e.getMessage());
-            e.printStackTrace();
-            System.exit(1);
-        }
-    }
 }

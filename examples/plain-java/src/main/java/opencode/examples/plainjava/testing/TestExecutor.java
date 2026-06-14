@@ -1,12 +1,12 @@
 package opencode.examples.plainjava.testing;
 
+import opencode.sdk.api.PtyApi;
 import opencode.sdk.api.SessionApi;
 import opencode.sdk.invoker.ApiClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Constructor;
-import java.util.Base64;
 import java.util.List;
 
 public class TestExecutor {
@@ -92,18 +92,12 @@ public class TestExecutor {
     }
 
     private ExampleContext createContext() {
-        ApiClient apiClient = new ApiClient();
-        apiClient.updateBaseUri(config.getBaseUrl());
-
-        if (config.getUsername() != null && config.getPassword() != null) {
-            String credentials = config.getUsername() + ":" + config.getPassword();
-            String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
-            apiClient.setRequestInterceptor(builder -> builder.header("Authorization", "Basic " + encoded));
-        }
+        ApiClient apiClient = SdkClientFactory.createClient(
+                config.getBaseUrl(), config.getUsername(), config.getPassword());
 
         // Initialize cleanup manager
         if (cleanupManager == null) {
-            cleanupManager = new CleanupManager(new SessionApi(apiClient), testLogger);
+            cleanupManager = new CleanupManager(new SessionApi(apiClient), new PtyApi(apiClient), testLogger);
         }
 
         ResourceTracker tracker = new ResourceTracker();
