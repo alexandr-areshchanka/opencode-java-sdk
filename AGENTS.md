@@ -135,6 +135,91 @@ cd examples/spring-boot && mvn clean package
 
 Docker builds are pinned to the version in `.opencode-version` via the `OPENCODE_VERSION` build arg, ensuring reproducible builds.
 
+## Running the OpenCode Server (Docker)
+
+The SDK and all examples require a running OpenCode server. The Docker configuration lives in [`docker/opencode/`](docker/opencode/) and is pinned to the version in [`.opencode-version`](.opencode-version) (see [Version Management](#version-management)).
+
+### Quick Start
+
+```bash
+# 1. Configure credentials (required: Z_AI_API_KEY)
+cd docker/opencode
+cp .env.opencode.example .env.opencode
+# Edit .env.opencode: set Z_AI_API_KEY, OPENCODE_SERVER_USERNAME, OPENCODE_SERVER_PASSWORD
+
+# 2. Build and start the server (detached)
+docker-compose up --build -d
+
+# 3. Verify health
+curl -u opencode:opencode123 http://localhost:4096/global/health
+
+# 4. Stop the server
+docker-compose down
+```
+
+### Required Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `Z_AI_API_KEY` | Z.AI provider API key (no default — must be set) | — |
+| `OPENCODE_SERVER_USERNAME` | HTTP Basic Auth username | `opencode` |
+| `OPENCODE_SERVER_PASSWORD` | HTTP Basic Auth password | `opencode123` |
+| `OPENCODE_SERVER_PORT` | Server port | `4096` |
+
+### Endpoints
+
+- **API**: `http://localhost:4096`
+- **Health**: `GET /global/health`
+- **Interactive docs**: http://localhost:4096/doc
+
+See [`docker/opencode/README.md`](docker/opencode/README.md) for the complete setup, configuration methods, and troubleshooting.
+
+## Running the Examples
+
+Both examples require a running OpenCode server (see above) and the SDK installed in the local Maven repository:
+
+```bash
+mvn clean install -DskipTests -pl sdk
+```
+
+### Plain Java Example (`examples/plain-java/`)
+
+Runs 18 self-contained examples covering every SDK area (sessions, files, events, MCP, PTY, etc.) against a live server. It uses the SDK directly with no Spring.
+
+```bash
+cd examples/plain-java
+mvn exec:java -Dexec.mainClass="opencode.examples.plainjava.Main"
+```
+
+Or build and run the packaged JAR:
+
+```bash
+cd examples/plain-java
+mvn clean package -DskipTests
+java -jar target/opencode-examples-plain-java-<revision>.jar   # main JAR, not the -test-runner JARs
+```
+
+The example connects to `http://localhost:4096` with credentials `opencode`/`opencode123`. See [`examples/plain-java/README.md`](examples/plain-java/README.md).
+
+### Spring Boot Example (`examples/spring-boot/`)
+
+A Spring Boot REST application with 17 controllers exposing the full SDK over HTTP. Runs on port 8080 (separate from the OpenCode server on 4096).
+
+```bash
+cd examples/spring-boot
+mvn spring-boot:run
+```
+
+Or build and run the packaged JAR:
+
+```bash
+cd examples/spring-boot
+mvn clean package -DskipTests
+java -jar target/opencode-examples-spring-boot-<revision>.jar
+```
+
+Once started, the REST API is at http://localhost:8080 (e.g. http://localhost:8080/api/system/health). Override the server connection via environment variables `OPENCODE_BASE_URL`, `OPENCODE_USERNAME`, `OPENCODE_PASSWORD`, or in `application.properties`. See [`examples/spring-boot/AGENTS.md`](examples/spring-boot/AGENTS.md).
+
 ## OpenAPI Reference
 
 The OpenCode server API specification is available at:
